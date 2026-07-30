@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Déclaration des paramètres de barème (sans valeur : les valeurs datées
+      vivent dans hr_rule_parameter_value_<année>_data.xml).
+      Chaque paramètre est lu par payslip._rule_parameter(code) à la date du
+      bulletin, ce qui sélectionne automatiquement le millésime en vigueur.
+    -->
+
+    <!-- Québec -->
+    <record id="rule_param_qc_rrq" model="hr.rule.parameter">
+        <field name="name">QC — RRQ (base + 1re cotisation supplémentaire)</field>
+        <field name="code">l10n_ca_qc_rrq</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_rrq2" model="hr.rule.parameter">
+        <field name="name">QC — RRQ2 (2e cotisation supplémentaire)</field>
+        <field name="code">l10n_ca_qc_rrq2</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_rqap" model="hr.rule.parameter">
+        <field name="name">QC — RQAP</field>
+        <field name="code">l10n_ca_qc_rqap</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_ae" model="hr.rule.parameter">
+        <field name="name">QC — Assurance-emploi (taux réduit)</field>
+        <field name="code">l10n_ca_qc_ae</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_fss" model="hr.rule.parameter">
+        <field name="name">QC — FSS (taux employeur)</field>
+        <field name="code">l10n_ca_qc_fss</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_normes_travail" model="hr.rule.parameter">
+        <field name="name">QC — Cotisation normes du travail (taux, max)</field>
+        <field name="code">l10n_ca_qc_normes_travail</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_vacances" model="hr.rule.parameter">
+        <field name="name">QC — Indemnité de vacances (taux &lt; 3 ans, &gt;= 3 ans, seuil)</field>
+        <field name="code">l10n_ca_qc_vacances</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_impot_paliers" model="hr.rule.parameter">
+        <field name="name">QC — Paliers d'impôt (plafond, taux, constante K)</field>
+        <field name="code">l10n_ca_qc_impot_paliers</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_montant_base" model="hr.rule.parameter">
+        <field name="name">QC — Montant personnel de base</field>
+        <field name="code">l10n_ca_qc_montant_base</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_qc_deduction_travailleur" model="hr.rule.parameter">
+        <field name="name">QC — Déduction pour travailleur (taux, max)</field>
+        <field name="code">l10n_ca_qc_deduction_travailleur</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <!-- Fédéral -->
+    <record id="rule_param_fed_paliers" model="hr.rule.parameter">
+        <field name="name">Fédéral — Paliers d'impôt (plafond, taux, constante K)</field>
+        <field name="code">l10n_ca_fed_paliers</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_fed_montant_base" model="hr.rule.parameter">
+        <field name="name">Fédéral — Montant personnel de base (MPBF)</field>
+        <field name="code">l10n_ca_fed_montant_base</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_fed_montant_emploi" model="hr.rule.parameter">
+        <field name="name">Fédéral — Montant canadien pour emploi</field>
+        <field name="code">l10n_ca_fed_montant_emploi</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="rule_param_fed_abattement_qc" model="hr.rule.parameter">
+        <field name="name">Fédéral — Abattement du Québec</field>
+        <field name="code">l10n_ca_fed_abattement_qc</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+</odoo>
