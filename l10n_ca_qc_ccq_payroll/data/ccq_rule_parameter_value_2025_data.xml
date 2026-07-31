@@ -17,6 +17,20 @@
       NE PAS modifier dans l'interface : ces valeurs produisent des remises légales.
     -->
 
+    <!-- Heures supplémentaires — convention IC 2025-2029 (PD5145), section XXI.
+         Première heure supplémentaire majorée de 50 %, puis 100 % dès la
+         deuxième. Le dimanche et les jours fériés chômés : 100 % dès la
+         première heure. Durée normale : 8 h par jour, 40 h du lundi au
+         vendredi (section XX).
+         ⚠️ Les seuils servent à répartir les heures à la saisie ; la
+         répartition entre régulières, +50 % et +100 % est portée par la
+         feuille de temps, jamais recalculée au moment de la paie. -->
+    <record id="val_ccq_heures_supp_2025" model="hr.rule.parameter.value">
+        <field name="rule_parameter_id" ref="rule_param_ccq_heures_supp"/>
+        <field name="date_from">2025-04-27</field>
+        <field name="parameter_value">{'majoration_50': 1.5, 'majoration_100': 2.0, 'seuil_quotidien': 8.0, 'seuil_hebdo': 40.0}</field>
+    </record>
+
     <!-- Prélèvement CCQ : 0,75 % salarié + 0,75 % employeur = 1,5 %.
          ⚠️ La base n'est PAS le brut fiscal : c'est le salaire cotisable PLUS le
          montant des congés et fériés (le 13 %). Minimum de 10 $ par mois, dû même

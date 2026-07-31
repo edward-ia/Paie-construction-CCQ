@@ -211,11 +211,8 @@ class HrPayslip(models.Model):
         somme DUE à l'employé, provisionnée à chaque paie et versée quand les
         vacances sont prises (elle devient alors un salaire imposable, soumis à
         toutes les retenues à ce moment-là). On ne l'impose donc pas ici et elle
-        n'entre pas dans le net : la règle NET ne somme que BASIC + DED, or
-        cette règle est en catégorie COMP. Ne PAS ajouter de champ
-        `not_computed_in_net` — il n'existe plus sur `hr.salary.rule` et fait
-        échouer l'installation sur une base neuve. À présenter SÉPARÉMENT des
-        remises fiscales dans le sommaire employeur.
+        n'entre pas dans le net (règle en not_computed_in_net). À présenter
+        SÉPARÉMENT des remises fiscales dans le sommaire employeur.
         """
         self.ensure_one()
         p = self._rule_parameter('l10n_ca_qc_vacances')

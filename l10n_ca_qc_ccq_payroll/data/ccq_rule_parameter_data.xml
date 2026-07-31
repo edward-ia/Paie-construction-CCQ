@@ -9,6 +9,12 @@
       en vigueur. Aucune de ces valeurs n'est un « taux courant ».
     -->
 
+    <record id="rule_param_ccq_heures_supp" model="hr.rule.parameter">
+        <field name="name">CCQ — Heures supplémentaires (multiplicateurs et seuils)</field>
+        <field name="code">l10n_ca_qc_ccq_heures_supp</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
     <record id="rule_param_ccq_prelevement" model="hr.rule.parameter">
         <field name="name">CCQ — Prélèvement (parts salarié et employeur, minimum mensuel)</field>
         <field name="code">l10n_ca_qc_ccq_prelevement</field>
