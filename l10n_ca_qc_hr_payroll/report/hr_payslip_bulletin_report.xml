@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Bulletin employé (Option B) : rapport QWeb autonome n'affichant QUE les
+      lignes de l'employé (gains + retenues DED + net). Les cotisations de
+      l'employeur (COMP) et la provision de vacances en sont volontairement
+      exclues : elles vivent sur le « Sommaire employeur » (rapport distinct).
+      La logique de calcul n'est PAS touchée — pur travail de présentation.
+    -->
+
+    <record id="action_report_bulletin_employe" model="ir.actions.report">
+        <field name="name">Bulletin employé</field>
+        <field name="model">hr.payslip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ca_qc_hr_payroll.report_bulletin_employe</field>
+        <field name="report_file">l10n_ca_qc_hr_payroll.report_bulletin_employe</field>
+        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Bulletin - %s' % (object.employee_id.name or '')</field>
+    </record>
+
+    <!--
+      On fait du « Bulletin employé » le modèle de rapport de la structure QC.
+      Ainsi l'impression, la génération du PDF à la confirmation ET l'envoi par
+      courriel produisent tous le bulletin épuré (lignes employé seulement) —
+      l'employé ne reçoit jamais le rapport standard avec les charges employeur.
+      (La structure est définie dans hr_payroll_structure_data.xml, chargé avant
+      ce fichier : l'xmlid est donc déjà connu ici.)
+    -->
+    <record id="structure_qc_regular" model="hr.payroll.structure">
+        <field name="report_id" ref="action_report_bulletin_employe"/>
+    </record>
+
+    <template id="report_bulletin_employe">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="mb-1">Bulletin de paie</h2>
+                        <p class="text-muted mt-0" t-out="o.name"/>
+
+                        <!-- Informations sur l'employé -->
+                        <table class="table table-sm table-borderless mb-4">
+                            <tr>
+                                <td style="width:15%"><strong>Employé</strong></td>
+                                <td style="width:35%" t-out="o.employee_id.name"/>
+                                <td style="width:20%"><strong>Période</strong></td>
+                                <td>
+                                    <span t-out="o.date_from" t-options="{'widget': 'date'}"/>
+                                    au
+                                    <span t-out="o.date_to" t-options="{'widget': 'date'}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Poste</strong></td>
+                                <td t-out="o.employee_id.job_title or ''"/>
+                                <td><strong>Date de paiement</strong></td>
+                                <td t-out="o.paid_date" t-options="{'widget': 'date'}"/>
+                            </tr>
+                            <tr t-if="o.employee_id.registration_number">
+                                <td><strong>Référence</strong></td>
+                                <td t-out="o.employee_id.registration_number"/>
+                                <td/>
+                                <td/>
+                            </tr>
+                        </table>
+
+                        <!-- Gains -->
+                        <t t-set="gains" t-value="o.line_ids.filtered(lambda l: l.category_id.code in ('BASIC', 'ALW') and l.appears_on_payslip)"/>
+                        <t t-set="retenues" t-value="o.line_ids.filtered(lambda l: l.category_id.code == 'DED' and l.appears_on_payslip)"/>
+
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Gains</th>
+                                    <th class="text-end">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="gains" t-as="line">
+                                    <td t-out="line.name"/>
+                                    <td class="text-end"
+                                        t-out="line.total"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/>
+                                </tr>
+                                <tr class="border-top">
+                                    <td><strong>Salaire brut</strong></td>
+                                    <td class="text-end"><strong
+                                        t-out="o.gross_wage"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Retenues sur la paie de l'employé -->
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Retenues à la source</th>
+                                    <th class="text-end">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="retenues" t-as="line">
+                                    <td t-out="line.name"/>
+                                    <td class="text-end"
+                                        t-out="line.total"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/>
+                                </tr>
+                                <tr class="border-top">
+                                    <td><strong>Total des retenues</strong></td>
+                                    <td class="text-end"><strong
+                                        t-out="sum(retenues.mapped('total'))"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Salaire net -->
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr class="table-active">
+                                    <td><h4 class="my-1">Salaire net</h4></td>
+                                    <td class="text-end"><h4 class="my-1"
+                                        t-out="o.net_wage"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="text-muted mt-4" style="font-size:9px;">
+                            Ce bulletin présente uniquement les retenues sur la paie de l'employé.
+                            Les cotisations de l'employeur (RRQ, RQAP, assurance-emploi, FSS, CNESST,
+                            normes du travail) et la provision d'indemnité de vacances figurent sur le
+                            sommaire employeur, un document distinct.
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         SOCIÉTÉ ET EMPLOYÉ
+         ================================================================ -->
+
+    <record id="view_company_form_ccq" model="ir.ui.view">
+        <field name="name">res.company.form.ccq</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <field name="currency_id" position="after">
+                <field name="l10n_ca_qc_ccq_employeur"/>
+                <field name="l10n_ca_qc_ccq_numero_employeur"
+                       invisible="not l10n_ca_qc_ccq_employeur"/>
+                <field name="l10n_ca_qc_ccq_licence_rbq"
+                       invisible="not l10n_ca_qc_ccq_employeur"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_employee_form_ccq" model="ir.ui.view">
+        <field name="name">hr.employee.form.ccq</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Construction (CCQ)" name="ccq">
+                    <group>
+                        <group string="Assujettissement">
+                            <field name="l10n_ca_qc_ccq_assujetti"/>
+                        </group>
+                        <group string="Métier"
+                               invisible="not l10n_ca_qc_ccq_assujetti">
+                            <field name="l10n_ca_qc_ccq_metier_id"/>
+                            <field name="l10n_ca_qc_ccq_periode"/>
+                            <field name="l10n_ca_qc_ccq_carte_competence"/>
+                            <field name="l10n_ca_qc_ccq_carte_expiration"/>
+                        </group>
+                        <group string="Syndicat"
+                               invisible="not l10n_ca_qc_ccq_assujetti">
+                            <field name="l10n_ca_qc_ccq_local_id"/>
+                            <field name="l10n_ca_qc_ccq_association_id"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         CHANTIERS
+         ================================================================ -->
+
+    <record id="view_ccq_chantier_list" model="ir.ui.view">
+        <field name="name">ccq.chantier.list</field>
+        <field name="model">ccq.chantier</field>
+        <field name="arch" type="xml">
+            <list string="Chantiers">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="partner_id"/>
+                <field name="city"/>
+                <field name="assujetti"/>
+                <field name="secteur_id"/>
+                <field name="annexe_id"/>
+                <field name="region_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ccq_chantier_form" model="ir.ui.view">
+        <field name="name">ccq.chantier.form</field>
+        <field name="model">ccq.chantier</field>
+        <field name="arch" type="xml">
+            <form string="Chantier">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nom du chantier"/></h1>
+                    </div>
+                    <group>
+                        <group string="Identification">
+                            <field name="code"/>
+                            <field name="partner_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Régime">
+                            <field name="assujetti"/>
+                            <field name="secteur_id" required="assujetti"/>
+                            <field name="annexe_id" required="assujetti"
+                                   domain="[('secteur_id', '=', secteur_id)]"/>
+                            <field name="region_id"/>
+                        </group>
+                        <group string="Adresse">
+                            <field name="street"/>
+                            <field name="city"/>
+                            <field name="zip"/>
+                        </group>
+                        <group string="Dates">
+                            <field name="date_ouverture"/>
+                            <field name="date_fermeture"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Notes internes…"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ccq_chantier" model="ir.actions.act_window">
+        <field name="name">Chantiers</field>
+        <field name="res_model">ccq.chantier</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ================================================================
+         FEUILLES DE TEMPS
+         ================================================================ -->
+
+    <record id="view_ccq_feuille_temps_list" model="ir.ui.view">
+        <field name="name">ccq.feuille.temps.list</field>
+        <field name="model">ccq.feuille.temps</field>
+        <field name="arch" type="xml">
+            <list string="Feuilles de temps">
+                <field name="employee_id"/>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="total_heures" sum="Total"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ccq_feuille_temps_form" model="ir.ui.view">
+        <field name="name">ccq.feuille.temps.form</field>
+        <field name="model">ccq.feuille.temps</field>
+        <field name="arch" type="xml">
+            <form string="Feuille de temps">
+                <header>
+                    <button name="action_confirmer" type="object" string="Confirmer"
+                            class="btn-primary" invisible="state != 'brouillon'"/>
+                    <button name="action_remettre_brouillon" type="object"
+                            string="Remettre en brouillon" invisible="state != 'confirme'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"
+                                   readonly="state != 'brouillon'"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="date_debut"
+                                   readonly="state != 'brouillon'"/>
+                            <field name="date_fin"/>
+                            <field name="total_heures"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Heures" name="heures">
+                            <field name="ligne_ids" readonly="state != 'brouillon'">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="chantier_id"/>
+                                    <field name="heures_regulieres" sum="Régulières"/>
+                                    <field name="heures_supp_50" sum="+50 %"/>
+                                    <field name="heures_supp_100" sum="+100 %"/>
+                                    <field name="total_heures" sum="Total"/>
+                                    <field name="prime_ids" widget="many2many_tags"
+                                           optional="show"/>
+                                    <field name="distance_km" optional="hide"/>
+                                    <field name="chambre_pension" optional="hide"/>
+                                    <field name="assujetti" optional="show"/>
+                                    <field name="taux_horaire" optional="show"/>
+                                    <field name="metier_id" optional="hide"/>
+                                    <field name="periode" optional="hide"/>
+                                    <field name="secteur_id" optional="hide"/>
+                                    <field name="annexe_id" optional="hide"/>
+                                    <field name="region_id" optional="hide"/>
+                                    <field name="local_id" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ccq_feuille_temps" model="ir.actions.act_window">
+        <field name="name">Feuilles de temps</field>
+        <field name="res_model">ccq.feuille.temps</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ================================================================
+         CONFIGURATION — RÉFÉRENTIEL
+         ================================================================ -->
+
+    <record id="view_ccq_metier_list" model="ir.ui.view">
+        <field name="name">ccq.metier.list</field>
+        <field name="model">ccq.metier</field>
+        <field name="arch" type="xml">
+            <list string="Métiers" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="type_emploi"/>
+                <field name="nb_periodes_apprentissage"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_metier" model="ir.actions.act_window">
+        <field name="name">Métiers et occupations</field>
+        <field name="res_model">ccq.metier</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_secteur_list" model="ir.ui.view">
+        <field name="name">ccq.secteur.list</field>
+        <field name="model">ccq.secteur</field>
+        <field name="arch" type="xml">
+            <list string="Secteurs" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="convention_ref"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_secteur" model="ir.actions.act_window">
+        <field name="name">Secteurs</field>
+        <field name="res_model">ccq.secteur</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_annexe_list" model="ir.ui.view">
+        <field name="name">ccq.annexe.list</field>
+        <field name="model">ccq.annexe</field>
+        <field name="arch" type="xml">
+            <list string="Annexes de salaire" editable="bottom">
+                <field name="secteur_id"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="chantier_isole"/>
+                <field name="heures_supp_a_taux_simple"/>
+                <field name="note" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_annexe" model="ir.actions.act_window">
+        <field name="name">Annexes de salaire</field>
+        <field name="res_model">ccq.annexe</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_region_list" model="ir.ui.view">
+        <field name="name">ccq.region.list</field>
+        <field name="model">ccq.region</field>
+        <field name="arch" type="xml">
+            <list string="Régions" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_region" model="ir.actions.act_window">
+        <field name="name">Régions</field>
+        <field name="res_model">ccq.region</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_association_list" model="ir.ui.view">
+        <field name="name">ccq.association.syndicale.list</field>
+        <field name="model">ccq.association.syndicale</field>
+        <field name="arch" type="xml">
+            <list string="Associations syndicales" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_association" model="ir.actions.act_window">
+        <field name="name">Associations syndicales</field>
+        <field name="res_model">ccq.association.syndicale</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_local_form" model="ir.ui.view">
+        <field name="name">ccq.local.syndical.form</field>
+        <field name="model">ccq.local.syndical</field>
+        <field name="arch" type="xml">
+            <form string="Local syndical">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="association_id"/>
+                            <field name="numero"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="metier_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Cotisations datées" name="cotisations">
+                            <field name="cotisation_ids">
+                                <list editable="bottom">
+                                    <field name="date_debut"/>
+                                    <field name="mode_base"/>
+                                    <field name="valeur_base"/>
+                                    <field name="supplement_horaire"/>
+                                    <field name="note" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_ccq_local_list" model="ir.ui.view">
+        <field name="name">ccq.local.syndical.list</field>
+        <field name="model">ccq.local.syndical</field>
+        <field name="arch" type="xml">
+            <list string="Locaux syndicaux">
+                <field name="association_id"/>
+                <field name="numero"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_local" model="ir.actions.act_window">
+        <field name="name">Locaux syndicaux</field>
+        <field name="res_model">ccq.local.syndical</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_ccq_prime_list" model="ir.ui.view">
+        <field name="name">ccq.prime.list</field>
+        <field name="model">ccq.prime</field>
+        <field name="arch" type="xml">
+            <list string="Primes de convention">
+                <field name="secteur_id"/>
+                <field name="article"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="metier_ids" widget="many2many_tags"/>
+                <field name="mode"/>
+                <field name="valeur"/>
+                <field name="majorable"/>
+                <field name="versee_heures_supp"/>
+                <field name="date_debut"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_prime" model="ir.actions.act_window">
+        <field name="name">Primes de convention</field>
+        <field name="res_model">ccq.prime</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ================================================================
+         CONFIGURATION — TAUX ET BARÈMES DATÉS
+         ================================================================ -->
+
+    <record id="view_ccq_taux_salaire_list" model="ir.ui.view">
+        <field name="name">ccq.taux.salaire.list</field>
+        <field name="model">ccq.taux.salaire</field>
+        <field name="arch" type="xml">
+            <list string="Taux de salaire" editable="bottom">
+                <field name="date_debut"/>
+                <field name="metier_id"/>
+                <field name="secteur_id"/>
+                <field name="annexe_id"/>
+                <field name="periode"/>
+                <field name="taux_horaire"/>
+                <field name="av_soc_retraite_employe"/>
+                <field name="av_soc_assurance_employe"/>
+                <field name="av_soc_retraite_employeur"/>
+                <field name="av_soc_assurance_employeur"/>
+                <field name="note" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_taux_salaire" model="ir.actions.act_window">
+        <field name="name">Taux de salaire</field>
+        <field name="res_model">ccq.taux.salaire</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_taux_qualification_list" model="ir.ui.view">
+        <field name="name">ccq.taux.qualification.list</field>
+        <field name="model">ccq.taux.qualification</field>
+        <field name="arch" type="xml">
+            <list string="Fonds de qualification" editable="bottom">
+                <field name="date_debut"/>
+                <field name="metier_id"/>
+                <field name="taux_horaire"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_taux_qualification" model="ir.actions.act_window">
+        <field name="name">Fonds de qualification</field>
+        <field name="res_model">ccq.taux.qualification</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_bareme_deplacement_list" model="ir.ui.view">
+        <field name="name">ccq.bareme.deplacement.list</field>
+        <field name="model">ccq.bareme.deplacement</field>
+        <field name="arch" type="xml">
+            <list string="Barèmes de déplacement" editable="bottom">
+                <field name="date_debut"/>
+                <field name="secteur_id"/>
+                <field name="type_indemnite"/>
+                <field name="palier_km"/>
+                <field name="montant"/>
+                <field name="metier_ids" widget="many2many_tags"/>
+                <field name="note" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_bareme_deplacement" model="ir.actions.act_window">
+        <field name="name">Barèmes de déplacement</field>
+        <field name="res_model">ccq.bareme.deplacement</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ================================================================
+         MENUS
+         ================================================================ -->
+
+    <menuitem id="menu_ccq_root" name="Construction (CCQ)"
+              groups="hr.group_hr_user" sequence="95"/>
+
+    <menuitem id="menu_ccq_operations" name="Opérations"
+              parent="menu_ccq_root" sequence="10"/>
+    <menuitem id="menu_ccq_feuille_temps" name="Feuilles de temps"
+              parent="menu_ccq_operations" action="action_ccq_feuille_temps" sequence="10"/>
+    <menuitem id="menu_ccq_chantier" name="Chantiers"
+              parent="menu_ccq_operations" action="action_ccq_chantier" sequence="20"/>
+
+    <menuitem id="menu_ccq_config" name="Configuration"
+              parent="menu_ccq_root" groups="hr.group_hr_manager" sequence="90"/>
+    <menuitem id="menu_ccq_metier" name="Métiers et occupations"
+              parent="menu_ccq_config" action="action_ccq_metier" sequence="10"/>
+    <menuitem id="menu_ccq_secteur" name="Secteurs"
+              parent="menu_ccq_config" action="action_ccq_secteur" sequence="20"/>
+    <menuitem id="menu_ccq_annexe" name="Annexes de salaire"
+              parent="menu_ccq_config" action="action_ccq_annexe" sequence="30"/>
+    <menuitem id="menu_ccq_region" name="Régions"
+              parent="menu_ccq_config" action="action_ccq_region" sequence="40"/>
+    <menuitem id="menu_ccq_association" name="Associations syndicales"
+              parent="menu_ccq_config" action="action_ccq_association" sequence="50"/>
+    <menuitem id="menu_ccq_local" name="Locaux syndicaux"
+              parent="menu_ccq_config" action="action_ccq_local" sequence="60"/>
+    <menuitem id="menu_ccq_prime" name="Primes de convention"
+              parent="menu_ccq_config" action="action_ccq_prime" sequence="70"/>
+    <menuitem id="menu_ccq_taux_salaire" name="Taux de salaire"
+              parent="menu_ccq_config" action="action_ccq_taux_salaire" sequence="80"/>
+    <menuitem id="menu_ccq_taux_qualification" name="Fonds de qualification"
+              parent="menu_ccq_config" action="action_ccq_taux_qualification" sequence="90"/>
+    <menuitem id="menu_ccq_bareme_deplacement" name="Barèmes de déplacement"
+              parent="menu_ccq_config" action="action_ccq_bareme_deplacement" sequence="100"/>
+
+</odoo>
