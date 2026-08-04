@@ -198,4 +198,11 @@
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = payslip._l10n_ca_qc_vacances(categories['GROSS'])</field>
     </record>
+
+    <delete model="hr.salary.rule"
+            search="[('struct_id', '=', ref('structure_qc_regular')),
+                     ('name', 'in', ['Basic Salary', 'Taxable Salary',
+                                     'Attachment of Salary', 'Assignment of Salary',
+                                     'Child Support', 'Deduction',
+                                     'Reimbursement', 'Net Salary'])]"/>
 </odoo>
