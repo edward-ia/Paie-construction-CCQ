@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+      ================================================================
+      RÉFÉRENTIEL CCQ — DONNÉES VÉRIFIÉES SUR SOURCE
+      ================================================================
+      Ne contient QUE ce qui a été lu dans un document officiel. Ce qui n'a pas
+      été vérifié n'est pas livré : une valeur inventée dans un référentiel de
+      paie est plus dangereuse qu'une valeur absente, parce qu'elle ne se
+      remarque pas.
+
+      NON LIVRÉ, à saisir depuis la source CCQ :
+        - la liste des régions administratives ;
+        - les annexes « normales » des secteurs industriel, résidentiel et génie
+          civil (seules les annexes vérifiées figurent ci-dessous) ;
+        - les locaux syndicaux et leurs formules de cotisation ;
+        - les grilles de taux horaires (ccq.taux.salaire), qui viennent de
+          l'outil des taux de la CCQ, ccq.org/salaire.
+    -->
+
+    <!-- ============ LES QUATRE SECTEURS ============ -->
+
+    <record id="secteur_res" model="ccq.secteur">
+        <field name="name">Résidentiel</field>
+        <field name="code">RES</field>
+        <field name="convention_ref">PD5147</field>
+    </record>
+    <record id="secteur_ic" model="ccq.secteur">
+        <field name="name">Institutionnel et commercial</field>
+        <field name="code">IC</field>
+        <field name="convention_ref">PD5145</field>
+    </record>
+    <record id="secteur_ind" model="ccq.secteur">
+        <field name="name">Industriel</field>
+        <field name="code">IND</field>
+        <field name="convention_ref">PD5144</field>
+    </record>
+    <record id="secteur_gcv" model="ccq.secteur">
+        <field name="name">Génie civil et voirie</field>
+        <field name="code">GCV</field>
+        <field name="convention_ref">PD5146</field>
+    </record>
+
+    <!-- ============ ANNEXES DE SALAIRE ============
+         Les annexes « -1 » et « -2 » couvrent les chantiers isolés, le territoire
+         de la Baie-James et les projets au nord du 55e parallèle. Sur ces
+         chantiers, les CINQ premières heures supplémentaires sont à +50 % avant le
+         passage à +100 %, contre UNE en régime normal (PD5145, section XXI). -->
+
+    <record id="annexe_ic_c" model="ccq.annexe">
+        <field name="name">Annexe C — taux généraux</field>
+        <field name="code">C</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="heures_supp_a_taux_simple">1</field>
+    </record>
+    <record id="annexe_ic_c1" model="ccq.annexe">
+        <field name="name">Annexe C-1 — chantiers isolés, Baie-James, nord du 55e parallèle</field>
+        <field name="code">C-1</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="chantier_isole" eval="True"/>
+        <field name="heures_supp_a_taux_simple">5</field>
+        <field name="note">Couvre les chantiers isolés, le territoire de la Baie-James et les projets de construction au nord du 55e parallèle, y compris le projet Grande-Baleine.</field>
+    </record>
+    <record id="annexe_ind_b1" model="ccq.annexe">
+        <field name="name">Annexe B-1 — chantiers isolés, Baie-James, nord du 55e parallèle</field>
+        <field name="code">B-1</field>
+        <field name="secteur_id" ref="secteur_ind"/>
+        <field name="chantier_isole" eval="True"/>
+        <field name="heures_supp_a_taux_simple">5</field>
+    </record>
+    <record id="annexe_res_r2" model="ccq.annexe">
+        <field name="name">Annexe R-2</field>
+        <field name="code">R-2</field>
+        <field name="secteur_id" ref="secteur_res"/>
+        <field name="heures_supp_a_taux_simple">1</field>
+    </record>
+
+    <!-- ============ ASSOCIATIONS SYNDICALES ============ -->
+
+    <record id="asso_csd" model="ccq.association.syndicale">
+        <field name="name">CSD Construction</field>
+        <field name="code">CSD</field>
+    </record>
+    <record id="asso_csn" model="ccq.association.syndicale">
+        <field name="name">CSN Construction</field>
+        <field name="code">CSN</field>
+    </record>
+    <record id="asso_inter" model="ccq.association.syndicale">
+        <field name="name">Conseil provincial du Québec des métiers de la construction (International)</field>
+        <field name="code">CPQMC-I</field>
+    </record>
+    <record id="asso_ftq" model="ccq.association.syndicale">
+        <field name="name">FTQ-Construction</field>
+        <field name="code">FTQ</field>
+    </record>
+    <record id="asso_sqc" model="ccq.association.syndicale">
+        <field name="name">Syndicat québécois de la construction</field>
+        <field name="code">SQC</field>
+    </record>
+
+    <!-- ============ MÉTIER ============
+         Seul le métier du client pilote est livré. Le nombre de périodes
+         d'apprentissage reste à 0 (non renseigné) : il n'a pas été vérifié, et
+         une valeur inventée bloquerait à tort la saisie d'un apprenti. -->
+
+    <record id="metier_416" model="ccq.metier">
+        <field name="name">Mécanicien en protection-incendie</field>
+        <field name="code">416</field>
+        <field name="type_emploi">metier</field>
+        <field name="nb_periodes_apprentissage">0</field>
+    </record>
+
+    <!-- ============ PRIMES — INSTITUTIONNEL ET COMMERCIAL ============
+         Source : PD5145, section XXII, lue intégralement.
+
+         ⚠️ Article 22.01 : la rémunération des heures supplémentaires est établie
+         AVANT l'ajout des primes. Le pourcentage de majoration ne s'applique donc
+         pas aux primes, À LA SEULE EXCEPTION de celles de l'article 22.03 — d'où
+         `majorable` vrai uniquement sur les primes de chef d'équipe et de groupe.
+
+         Les enregistrements sans métier sont la règle générale ; ceux qui portent
+         un métier sont la règle particulière, qui l'emporte pour ce métier. -->
+
+    <record id="prime_ic_equipe_generale" model="ccq.prime">
+        <field name="name">Prime d'équipe (règle générale)</field>
+        <field name="code">IC_EQUIPE_GEN</field>
+        <field name="article">22.02 1)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.04</field>
+        <field name="majorable" eval="False"/>
+        <field name="date_debut">2025-04-27</field>
+        <field name="note">Salarié qui travaille dans une équipe autre que la première.</field>
+    </record>
+    <record id="prime_ic_equipe_416" model="ccq.prime">
+        <field name="name">Prime d'équipe — mécanicien en protection-incendie</field>
+        <field name="code">IC_EQUIPE_416</field>
+        <field name="article">22.02 2) j)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.10</field>
+        <field name="majorable" eval="False"/>
+        <field name="date_debut">2025-04-27</field>
+        <field name="note">Sept jours par semaine (du dimanche au samedi), incluant les jours fériés chômés. ⚠️ L'article ne mentionne PAS les heures supplémentaires, contrairement à d'autres métiers de la même liste — à faire confirmer par la CCQ ou l'ACQ avant la première paie réelle.</field>
+    </record>
+
+    <record id="prime_ic_chef_equipe_generale" model="ccq.prime">
+        <field name="name">Prime de chef d'équipe (règle générale)</field>
+        <field name="code">IC_CHEF_EQUIPE_GEN</field>
+        <field name="article">22.03 1)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.08</field>
+        <field name="majorable" eval="True"/>
+        <field name="date_debut">2025-04-27</field>
+    </record>
+    <record id="prime_ic_chef_groupe_generale" model="ccq.prime">
+        <field name="name">Prime de chef de groupe (règle générale)</field>
+        <field name="code">IC_CHEF_GROUPE_GEN</field>
+        <field name="article">22.03 1)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.10</field>
+        <field name="majorable" eval="True"/>
+        <field name="date_debut">2025-04-27</field>
+    </record>
+    <record id="prime_ic_chef_equipe_416" model="ccq.prime">
+        <field name="name">Prime de chef d'équipe — mécanicien en protection-incendie</field>
+        <field name="code">IC_CHEF_EQUIPE_416</field>
+        <field name="article">22.03 2) e)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.08</field>
+        <field name="majorable" eval="True"/>
+        <field name="date_debut">2025-04-27</field>
+    </record>
+    <record id="prime_ic_chef_groupe_416" model="ccq.prime">
+        <field name="name">Prime de chef de groupe — mécanicien en protection-incendie</field>
+        <field name="code">IC_CHEF_GROUPE_416</field>
+        <field name="article">22.03 2) e)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.11</field>
+        <field name="majorable" eval="True"/>
+        <field name="date_debut">2025-04-27</field>
+    </record>
+
+    <record id="prime_ic_horaire_deplace_generale" model="ccq.prime">
+        <field name="name">Prime de déplacement de l'horaire de travail (règle générale)</field>
+        <field name="code">IC_HORAIRE_GEN</field>
+        <field name="article">22.04 3)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.04</field>
+        <field name="majorable" eval="False"/>
+        <field name="date_debut">2025-04-27</field>
+    </record>
+    <record id="prime_ic_horaire_deplace_416" model="ccq.prime">
+        <field name="name">Prime de déplacement de l'horaire — mécanicien en protection-incendie</field>
+        <field name="code">IC_HORAIRE_416</field>
+        <field name="article">22.04 4) i)</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.15</field>
+        <field name="majorable" eval="False"/>
+        <field name="date_debut">2025-04-27</field>
+        <field name="note">S'applique quand la majorité des heures de la journée ne peut être exécutée dans l'horaire normal. ⚠️ Obligation administrative : la Commission doit être avisée sans délai.</field>
+    </record>
+
+    <record id="prime_ic_masque" model="ccq.prime">
+        <field name="name">Prime pour travaux avec masque à ventilation assistée</field>
+        <field name="code">IC_MASQUE</field>
+        <field name="article">22.06</field>
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="mode">montant_horaire</field>
+        <field name="valeur">1.10</field>
+        <field name="majorable" eval="False"/>
+        <field name="date_debut">2025-04-27</field>
+        <field name="note">Tous métiers. Ne s'applique pas au salarié effectuant des travaux selon l'article 20.03 14) (manœuvre amiante).</field>
+    </record>
+
+    <!-- ============ BARÈMES DE DÉPLACEMENT — RÈGLE GÉNÉRALE IC ============
+         Source : ACQ, « Frais de déplacement 2025-2028 », articles 23.09 1) et 4) a).
+         Forfaits par PALIER de distance domicile-chantier, pas un taux au kilomètre.
+         Aucun métier renseigné = règle générale : c'est bien celle qui s'applique au
+         métier 416, qui ne figure dans aucune règle particulière. -->
+
+    <record id="depl_ic_65_2025" model="ccq.bareme.deplacement">
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="type_indemnite">deplacement</field>
+        <field name="palier_km">65</field>
+        <field name="montant">47.63</field>
+        <field name="date_debut">2025-04-27</field>
+        <field name="note">ACQ, Frais de déplacement 2025-2028, art. 23.09 1).</field>
+    </record>
+    <record id="depl_ic_90_2025" model="ccq.bareme.deplacement">
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="type_indemnite">deplacement</field>
+        <field name="palier_km">90</field>
+        <field name="montant">53.89</field>
+        <field name="date_debut">2025-04-27</field>
+    </record>
+    <record id="depl_ic_65_2026" model="ccq.bareme.deplacement">
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="type_indemnite">deplacement</field>
+        <field name="palier_km">65</field>
+        <field name="montant">50.01</field>
+        <field name="date_debut">2026-04-26</field>
+    </record>
+    <record id="depl_ic_90_2026" model="ccq.bareme.deplacement">
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="type_indemnite">deplacement</field>
+        <field name="palier_km">90</field>
+        <field name="montant">56.58</field>
+        <field name="date_debut">2026-04-26</field>
+    </record>
+
+    <record id="pension_ic_120_2025" model="ccq.bareme.deplacement">
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="type_indemnite">chambre_pension</field>
+        <field name="palier_km">120</field>
+        <field name="montant">175.00</field>
+        <field name="date_debut">2025-04-27</field>
+        <field name="note">ACQ, Frais de déplacement 2025-2028, art. 23.09 4) a).</field>
+    </record>
+    <record id="pension_ic_120_2026" model="ccq.bareme.deplacement">
+        <field name="secteur_id" ref="secteur_ic"/>
+        <field name="type_indemnite">chambre_pension</field>
+        <field name="palier_km">120</field>
+        <field name="montant">184.00</field>
+        <field name="date_debut">2026-04-26</field>
+    </record>
+</odoo>

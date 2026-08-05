@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Déclaration des paramètres CCQ (sans valeur : les valeurs datées vivent dans
+      les fichiers ccq_rule_parameter_value_AAAA_data.xml).
+
+      Même mécanisme que les barèmes fiscaux du module de base : chaque paramètre
+      est lu à la date des travaux, ce qui sélectionne automatiquement le millésime
+      en vigueur. Aucune de ces valeurs n'est un « taux courant ».
+    -->
+
+    <record id="rule_param_ccq_heures_supp" model="hr.rule.parameter">
+        <field name="name">CCQ — Heures supplémentaires (multiplicateurs et seuils)</field>
+        <field name="code">l10n_ca_qc_ccq_heures_supp</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <record id="rule_param_ccq_prelevement" model="hr.rule.parameter">
+        <field name="name">CCQ — Prélèvement (parts salarié et employeur, minimum mensuel)</field>
+        <field name="code">l10n_ca_qc_ccq_prelevement</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <record id="rule_param_ccq_conges" model="hr.rule.parameter">
+        <field name="name">CCQ — Congés annuels, jours fériés et congés de maladie (le « 13 % »)</field>
+        <field name="code">l10n_ca_qc_ccq_conges</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <record id="rule_param_ccq_fonds_formation" model="hr.rule.parameter">
+        <field name="name">CCQ — Fonds de formation ($/h, employeur)</field>
+        <field name="code">l10n_ca_qc_ccq_fonds_formation</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <record id="rule_param_ccq_fonds_indemnisation" model="hr.rule.parameter">
+        <field name="name">CCQ — Fonds d'indemnisation ($/h, employeur)</field>
+        <field name="code">l10n_ca_qc_ccq_fonds_indemnisation</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <record id="rule_param_ccq_contribution_sectorielle" model="hr.rule.parameter">
+        <field name="name">CCQ — Contribution sectorielle (taux et payeur, par secteur)</field>
+        <field name="code">l10n_ca_qc_ccq_contribution_sectorielle</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <record id="rule_param_ccq_associations_patronales" model="hr.rule.parameter">
+        <field name="name">CCQ — AECQ et ACQ ($/h, minimum mensuel, cotisation annuelle)</field>
+        <field name="code">l10n_ca_qc_ccq_associations_patronales</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+
+    <!--
+      Taxe de vente sur l'assurance : le paramètre est DÉCLARÉ mais volontairement
+      SANS VALEUR. Le taux n'a pas été vérifié à la source ; laisser le paramètre
+      vide fait échouer bruyamment le calcul le jour où on l'utilisera, ce qui est
+      infiniment préférable à une taxe silencieusement fausse sur chaque paie.
+    -->
+    <record id="rule_param_ccq_taxe_assurance" model="hr.rule.parameter">
+        <field name="name">CCQ — Taxe de vente sur l'assurance (À OBTENIR)</field>
+        <field name="code">l10n_ca_qc_ccq_taxe_assurance</field>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+</odoo>
