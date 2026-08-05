@@ -114,10 +114,14 @@ class HrPayslip(models.Model):
         return self._ccq_remuneration('heures_regulieres', 1.0)
 
     def _ccq_heures_supp_50(self):
-        """Heures majorées de 50 % — convention IC 2025-2029, section XXI.
+        """Heures majorées de 50 % — convention IC 2025-2029, article 21.02 a).
 
-        Première heure supplémentaire de la journée. La majoration s'ajoute à
-        l'heure elle-même : l'heure est donc payée 1,5 fois le taux, pas 0,5.
+        Première heure supplémentaire DE LA SEMAINE, et non de la journée : la
+        deuxième heure supplémentaire de la semaine est déjà à +100 %, même si
+        elle tombe un autre jour. Sur chantier isolé, ce sont les cinq premières
+        (art. 21.03 3) a), d'où `heures_supp_a_taux_simple` sur l'annexe).
+        La majoration s'ajoute à l'heure elle-même : l'heure est donc payée
+        1,5 fois le taux, pas 0,5.
 
         ⚠️ Article 22.01 : la rémunération des heures supplémentaires est
         établie AVANT l'ajout des primes. Le multiplicateur ne s'applique donc
@@ -144,7 +148,14 @@ class HrPayslip(models.Model):
         taux = p['conges_annuels'] + p['jours_feries'] + p['maladie']
         return round(self._ccq_salaire_cotisable() * taux, 2)
 
+    def _ccq_base_hors_r20(self, gross):
+        self.ensure_one()
+        return max(0.0, round(gross - self._ccq_salaire_cotisable(), 2))
+
     def _l10n_ca_qc_vacances(self, gross):
         self.ensure_one()
-        return super()._l10n_ca_qc_vacances(
-            max(0.0, round(gross - self._ccq_salaire_cotisable(), 2)))
+        return super()._l10n_ca_qc_vacances(self._ccq_base_hors_r20(gross))
+
+    def _l10n_ca_qc_normes_travail(self, gross):
+        self.ensure_one()
+        return super()._l10n_ca_qc_normes_travail(self._ccq_base_hors_r20(gross))
