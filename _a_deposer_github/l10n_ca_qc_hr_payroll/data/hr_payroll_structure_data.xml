@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Type de structure : salarié du Québec, paie aux 2 semaines par défaut -->
+    <record id="structure_type_qc" model="hr.payroll.structure.type">
+        <field name="name">Salarié — Québec</field>
+        <field name="country_id" ref="base.ca"/>
+        <field name="wage_type">monthly</field>
+        <field name="default_schedule_pay">bi-weekly</field>
+    </record>
+
+    <!-- Structure salariale québécoise -->
+    <record id="structure_qc_regular" model="hr.payroll.structure">
+        <field name="name">Paie régulière — Québec</field>
+        <field name="type_id" ref="structure_type_qc"/>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+</odoo>
