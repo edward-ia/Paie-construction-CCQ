@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="region_00" model="ccq.region">
+        <field name="code">00</field>
+        <field name="name">Extérieur</field>
+    </record>
+
+    <record id="region_01" model="ccq.region">
+        <field name="code">01</field>
+        <field name="name">Îles-de-la-Madeleine</field>
+    </record>
+
+    <record id="region_02" model="ccq.region">
+        <field name="code">02</field>
+        <field name="name">Bas-Saint-Laurent–Gaspésie</field>
+    </record>
+
+    <record id="region_03" model="ccq.region">
+        <field name="code">03</field>
+        <field name="name">Saguenay–Lac-Saint-Jean</field>
+    </record>
+
+    <record id="region_04" model="ccq.region">
+        <field name="code">04</field>
+        <field name="name">Québec</field>
+    </record>
+
+    <record id="region_06" model="ccq.region">
+        <field name="code">06</field>
+        <field name="name">Trois-Rivières</field>
+    </record>
+
+    <record id="region_07" model="ccq.region">
+        <field name="code">07</field>
+        <field name="name">Cantons-de-l'Est</field>
+    </record>
+
+    <record id="region_08" model="ccq.region">
+        <field name="code">08</field>
+        <field name="name">Montréal</field>
+    </record>
+
+    <record id="region_09" model="ccq.region">
+        <field name="code">09</field>
+        <field name="name">Outaouais</field>
+    </record>
+
+    <record id="region_10" model="ccq.region">
+        <field name="code">10</field>
+        <field name="name">Nord-Ouest</field>
+    </record>
+
+    <record id="region_11" model="ccq.region">
+        <field name="code">11</field>
+        <field name="name">Côte-Nord</field>
+    </record>
+
+    <record id="region_13" model="ccq.region">
+        <field name="code">13</field>
+        <field name="name">Baie-James</field>
+    </record>
+
+    <record id="region_14" model="ccq.region">
+        <field name="code">14</field>
+        <field name="name">Nunavik</field>
+    </record>
+
+</odoo>

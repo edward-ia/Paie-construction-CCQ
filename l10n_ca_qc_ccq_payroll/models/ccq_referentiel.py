@@ -97,7 +97,12 @@ class CcqAnnexe(models.Model):
     _order = 'secteur_id, code'
 
     name = fields.Char(string="Nom", required=True, translate=True)
-    code = fields.Char(string="Code", required=True, help="Ex. « C », « C-1 », « B-1 », « R-2 ».")
+    code = fields.Char(
+        string="Code", required=True,
+        help="Le code de la CCQ, celui qui doit figurer au rapport mensuel : « C-3 », "
+             "« C-6 », « B-3 », « B-6 », « R-2 ». La convention collective, elle, "
+             "nomme les mêmes grilles « annexe C » et « annexe C-1 » — mêmes montants, "
+             "autre nomenclature.")
     secteur_id = fields.Many2one('ccq.secteur', string="Secteur", required=True, ondelete='restrict')
     chantier_isole = fields.Boolean(
         string="Chantier isolé / territoire nordique",
@@ -127,8 +132,11 @@ class CcqRegion(models.Model):
     calcul du taux — c'est l'annexe qui porte la grille. À ne pas confondre avec
     l'annexe : la région dit OÙ, l'annexe dit QUELLE GRILLE.
 
-    ⚠️ La liste officielle des régions n'est volontairement pas livrée en données :
-    elle doit être saisie depuis la source CCQ, pas devinée.
+    Les treize régions sont livrées en données, avec les codes officiels du
+    tableau C de PD5277. Ces codes NE se suivent PAS : il n'existe ni 05, ni 12.
+    Et les noms sont ceux de la CCQ, non ceux des régions administratives du
+    Québec — « Trois-Rivières » pour la Mauricie, « Nord-Ouest » pour
+    l'Abitibi-Témiscamingue, « Cantons-de-l'Est » pour l'Estrie.
     """
 
     _name = 'ccq.region'

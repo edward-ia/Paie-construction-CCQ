@@ -28,9 +28,13 @@ class CcqChantier(models.Model):
 
     assujetti = fields.Boolean(
         string="Assujetti à la loi R-20", default=True,
-        help="Décoché pour les travaux hors champ (service, entretien, inspection) : "
-             "aucune cotisation CCQ n'est alors due et la paie retombe sur le régime "
-             "québécois ordinaire.",
+        help="À décocher seulement si les travaux sortent réellement du champ de la loi "
+             "R-20, ce qui est rare pour un entrepreneur de la construction. "
+             "L'installation des systèmes du bâtiment est de la construction dans tous les "
+             "cas ; leur entretien et leur réparation le sont aussi dès qu'ils sont "
+             "exécutés par vos propres salariés de la construction, même sous contrat de "
+             "service. Le travail fait occasionnellement en atelier reste lui aussi "
+             "assujetti. Sources : R-20 art. 1 f) et 19, et R-20, r. 1, art. 1 et 3.",
     )
     secteur_id = fields.Many2one('ccq.secteur', string="Secteur", ondelete='restrict')
     annexe_id = fields.Many2one('ccq.annexe', string="Annexe de salaire", ondelete='restrict')
@@ -61,19 +65,24 @@ class CcqChantier(models.Model):
                        chantier.secteur_id.code or "non défini")
                 )
 
-    @api.constrains('assujetti', 'secteur_id', 'annexe_id')
+    @api.constrains('assujetti', 'secteur_id', 'annexe_id', 'region_id')
     def _check_dimensions_assujetti(self):
-        """Un chantier assujetti sans secteur ni annexe ne peut pas produire de paie.
+        """Un chantier assujetti incomplet ne peut produire ni paie ni déclaration.
 
         On bloque à la saisie plutôt qu'au calcul : une feuille de temps rattachée à
         un chantier incomplet donnerait un taux introuvable une semaine plus tard,
         au pire moment.
+
+        La région n'entre dans aucun calcul de salaire, mais c'est l'une des sept
+        dimensions du rapport mensuel. Sans elle les heures ne peuvent pas être
+        ventilées, et l'information est irrécupérable un mois plus tard.
         """
         for chantier in self:
-            if chantier.assujetti and not (chantier.secteur_id and chantier.annexe_id):
+            if chantier.assujetti and not (chantier.secteur_id and chantier.annexe_id
+                                           and chantier.region_id):
                 raise ValidationError(
-                    "Le chantier « %s » est assujetti à la loi R-20 : son secteur et son "
-                    "annexe de salaire sont obligatoires." % chantier.name
+                    "Le chantier « %s » est assujetti à la loi R-20 : son secteur, son "
+                    "annexe de salaire et sa région sont obligatoires." % chantier.name
                 )
 
     @api.onchange('secteur_id')

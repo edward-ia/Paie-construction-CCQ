@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.5.0',
+    'version': '19.0.0.7.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",
@@ -48,6 +48,7 @@ reste, pour pouvoir rejouer l'historique.
         'data/ccq_rule_parameter_data.xml',
         'data/ccq_rule_parameter_value_2025_data.xml',
         'data/ccq_referentiel_data.xml',
+        'data/ccq_region_data.xml',
         'data/ccq_taux_data.xml',
         'data/ccq_salary_rule_data.xml',
         'views/ccq_views.xml',
