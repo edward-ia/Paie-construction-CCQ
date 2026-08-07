@@ -40,7 +40,7 @@
                         domain="[('chantier_isole', '=', False)]"/>
                 <separator/>
                 <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
                 </group>
             </search>
@@ -59,7 +59,7 @@
                 <filter name="occupation" string="Occupations" domain="[('type_emploi', '=', 'occupation')]"/>
                 <separator/>
                 <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_type" string="Type d'emploi" context="{'group_by': 'type_emploi'}"/>
                 </group>
             </search>
@@ -88,7 +88,7 @@
                 <field name="association_id"/>
                 <field name="metier_ids"/>
                 <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_association" string="Association"
                             context="{'group_by': 'association_id'}"/>
                 </group>
@@ -117,7 +117,7 @@
                         domain="[('versee_heures_supp', '=', True)]"/>
                 <separator/>
                 <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
                     <filter name="grp_mode" string="Mode de calcul" context="{'group_by': 'mode'}"/>
                     <filter name="grp_date" string="Entrée en vigueur" context="{'group_by': 'date_debut'}"/>
@@ -146,7 +146,7 @@
                         domain="['|', ('date_fermeture', '=', False), ('date_fermeture', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_client" string="Client" context="{'group_by': 'partner_id'}"/>
                     <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
                     <filter name="grp_annexe" string="Annexe" context="{'group_by': 'annexe_id'}"/>
@@ -167,7 +167,7 @@
                 <field name="periode"/>
                 <filter name="en_vigueur" string="En vigueur aujourd'hui"
                         domain="[('date_debut', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_metier" string="Métier" context="{'group_by': 'metier_id'}"/>
                     <filter name="grp_annexe" string="Annexe" context="{'group_by': 'annexe_id'}"/>
                     <filter name="grp_periode" string="Compétence" context="{'group_by': 'periode'}"/>
@@ -186,7 +186,7 @@
                 <field name="date_debut" string="Semaine"/>
                 <filter name="brouillon" string="Brouillon" domain="[('state', '=', 'brouillon')]"/>
                 <filter name="confirme" string="Confirmées" domain="[('state', '=', 'confirme')]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_employe" string="Salarié" context="{'group_by': 'employee_id'}"/>
                     <filter name="grp_state" string="État" context="{'group_by': 'state'}"/>
                     <filter name="grp_semaine" string="Semaine" context="{'group_by': 'date_debut'}"/>
@@ -206,7 +206,7 @@
                         domain="[('type_indemnite', '=', 'deplacement')]"/>
                 <filter name="chambre" string="Chambre et pension"
                         domain="[('type_indemnite', '=', 'chambre_pension')]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
                     <filter name="grp_type" string="Type d'indemnité" context="{'group_by': 'type_indemnite'}"/>
                     <filter name="grp_date" string="Entrée en vigueur" context="{'group_by': 'date_debut'}"/>
