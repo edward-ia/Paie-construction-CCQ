@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.7.0',
+    'version': '19.0.0.8.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",
@@ -13,7 +13,7 @@ RRQ, le RRQ2, l'AE et le RQAP viennent du module l10n_ca_qc_hr_payroll, déjà v
 au cent près contre WebRAS et PDOC. Ce module ajoute par-dessus ce qui est propre à
 la construction.
 
-CONTENU DE CETTE VERSION — le modèle de données uniquement :
+CONTENU :
   - référentiel CCQ : secteurs, annexes de salaire, régions, métiers, associations
     et locaux syndicaux, primes de convention ;
   - grilles de taux, fonds de qualification et barèmes de déplacement, tous
@@ -23,10 +23,17 @@ CONTENU DE CETTE VERSION — le modèle de données uniquement :
   - dimensions CCQ sur la fiche employé ;
   - feuilles de temps hebdomadaires (semaine CCQ : dimanche → samedi), avec les
     sept dimensions du rapport mensuel figées sur chaque ligne d'heures ;
-  - paramètres de cotisation CCQ datés (hr.rule.parameter).
+  - paramètres de cotisation CCQ datés (hr.rule.parameter) ;
+  - calcul de la paie : salaire de base pris ligne par ligne dans les feuilles de
+    temps confirmées, heures supplémentaires payées à 150 % et à 200 % du taux,
+    primes de convention, indemnité de congés de 13 % remplaçant la provision de
+    vacances sur la part conventionnée, et exclusion de la rémunération versée en
+    vertu de la loi R-20 de l'assiette de la cotisation aux normes du travail.
 
-PAS ENCORE FAIT : le moteur de calcul (règles de paie, cotisations, primes,
-déplacement), le rapport mensuel et les remises.
+PAS ENCORE FAIT : les retenues CCQ sur la paie du salarié (avantages sociaux,
+prélèvement, contribution sectorielle, cotisation syndicale), les charges
+patronales en dollars l'heure, les frais de déplacement, le rapport mensuel et
+les remises.
 
 Sources officielles :
   - CCQ, « Guide pour remplir le rapport mensuel » (PD5277)
@@ -52,6 +59,7 @@ reste, pour pouvoir rejouer l'historique.
         'data/ccq_taux_data.xml',
         'data/ccq_salary_rule_data.xml',
         'views/ccq_views.xml',
+        'views/ccq_search_views.xml',
     ],
     'installable': True,
     'application': False,

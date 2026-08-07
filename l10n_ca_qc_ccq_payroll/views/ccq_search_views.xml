@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ccq_region_search" model="ir.ui.view">
+        <field name="name">ccq.region.search</field>
+        <field name="model">ccq.region</field>
+        <field name="arch" type="xml">
+            <search string="Régions">
+                <field name="code"/>
+                <field name="name"/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_secteur_search" model="ir.ui.view">
+        <field name="name">ccq.secteur.search</field>
+        <field name="model">ccq.secteur</field>
+        <field name="arch" type="xml">
+            <search string="Secteurs">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="convention_ref" string="Convention"/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_annexe_search" model="ir.ui.view">
+        <field name="name">ccq.annexe.search</field>
+        <field name="model">ccq.annexe</field>
+        <field name="arch" type="xml">
+            <search string="Annexes de salaire">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="secteur_id"/>
+                <filter name="isole" string="Chantiers isolés et Baie-James"
+                        domain="[('chantier_isole', '=', True)]"/>
+                <filter name="regulier" string="Règle générale"
+                        domain="[('chantier_isole', '=', False)]"/>
+                <separator/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_metier_search" model="ir.ui.view">
+        <field name="name">ccq.metier.search</field>
+        <field name="model">ccq.metier</field>
+        <field name="arch" type="xml">
+            <search string="Métiers">
+                <field name="code"/>
+                <field name="name"/>
+                <filter name="metier" string="Métiers" domain="[('type_emploi', '=', 'metier')]"/>
+                <filter name="specialite" string="Spécialités" domain="[('type_emploi', '=', 'specialite')]"/>
+                <filter name="occupation" string="Occupations" domain="[('type_emploi', '=', 'occupation')]"/>
+                <separator/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_type" string="Type d'emploi" context="{'group_by': 'type_emploi'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_association_search" model="ir.ui.view">
+        <field name="name">ccq.association.syndicale.search</field>
+        <field name="model">ccq.association.syndicale</field>
+        <field name="arch" type="xml">
+            <search string="Associations syndicales">
+                <field name="code"/>
+                <field name="name"/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_local_search" model="ir.ui.view">
+        <field name="name">ccq.local.syndical.search</field>
+        <field name="model">ccq.local.syndical</field>
+        <field name="arch" type="xml">
+            <search string="Locaux syndicaux">
+                <field name="numero"/>
+                <field name="name"/>
+                <field name="association_id"/>
+                <field name="metier_ids"/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_association" string="Association"
+                            context="{'group_by': 'association_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_prime_search" model="ir.ui.view">
+        <field name="name">ccq.prime.search</field>
+        <field name="model">ccq.prime</field>
+        <field name="arch" type="xml">
+            <search string="Primes de convention">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="article" string="Article de la convention"/>
+                <field name="metier_ids"/>
+                <field name="secteur_id"/>
+                <filter name="pourcentage" string="En pourcentage du taux"
+                        domain="[('mode', '=', 'pourcentage')]"/>
+                <filter name="montant" string="En dollars par heure"
+                        domain="[('mode', '=', 'montant_horaire')]"/>
+                <separator/>
+                <filter name="majorable" string="Majorée en heures supplémentaires"
+                        domain="[('majorable', '=', True)]"/>
+                <filter name="versee_hs" string="Versée sur les heures supplémentaires"
+                        domain="[('versee_heures_supp', '=', True)]"/>
+                <separator/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
+                    <filter name="grp_mode" string="Mode de calcul" context="{'group_by': 'mode'}"/>
+                    <filter name="grp_date" string="Entrée en vigueur" context="{'group_by': 'date_debut'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_chantier_search" model="ir.ui.view">
+        <field name="name">ccq.chantier.search</field>
+        <field name="model">ccq.chantier</field>
+        <field name="arch" type="xml">
+            <search string="Chantiers">
+                <field name="name" string="Chantier"
+                       filter_domain="['|', '|', ('name', 'ilike', self), ('code', 'ilike', self), ('city', 'ilike', self)]"/>
+                <field name="partner_id"/>
+                <field name="secteur_id"/>
+                <field name="annexe_id"/>
+                <field name="region_id"/>
+                <filter name="assujetti" string="Assujettis à la loi R-20"
+                        domain="[('assujetti', '=', True)]"/>
+                <filter name="hors_champ" string="Hors champ R-20"
+                        domain="[('assujetti', '=', False)]"/>
+                <separator/>
+                <filter name="ouverts" string="Non fermés"
+                        domain="['|', ('date_fermeture', '=', False), ('date_fermeture', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="inactive" string="Archivé" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_client" string="Client" context="{'group_by': 'partner_id'}"/>
+                    <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
+                    <filter name="grp_annexe" string="Annexe" context="{'group_by': 'annexe_id'}"/>
+                    <filter name="grp_region" string="Région" context="{'group_by': 'region_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_taux_salaire_search" model="ir.ui.view">
+        <field name="name">ccq.taux.salaire.search</field>
+        <field name="model">ccq.taux.salaire</field>
+        <field name="arch" type="xml">
+            <search string="Taux de salaire">
+                <field name="metier_id"/>
+                <field name="secteur_id"/>
+                <field name="annexe_id"/>
+                <field name="periode"/>
+                <filter name="en_vigueur" string="En vigueur aujourd'hui"
+                        domain="[('date_debut', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_metier" string="Métier" context="{'group_by': 'metier_id'}"/>
+                    <filter name="grp_annexe" string="Annexe" context="{'group_by': 'annexe_id'}"/>
+                    <filter name="grp_periode" string="Compétence" context="{'group_by': 'periode'}"/>
+                    <filter name="grp_date" string="Entrée en vigueur" context="{'group_by': 'date_debut'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_feuille_temps_search" model="ir.ui.view">
+        <field name="name">ccq.feuille.temps.search</field>
+        <field name="model">ccq.feuille.temps</field>
+        <field name="arch" type="xml">
+            <search string="Feuilles de temps">
+                <field name="employee_id"/>
+                <field name="date_debut" string="Semaine"/>
+                <filter name="brouillon" string="Brouillon" domain="[('state', '=', 'brouillon')]"/>
+                <filter name="confirme" string="Confirmées" domain="[('state', '=', 'confirme')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_employe" string="Salarié" context="{'group_by': 'employee_id'}"/>
+                    <filter name="grp_state" string="État" context="{'group_by': 'state'}"/>
+                    <filter name="grp_semaine" string="Semaine" context="{'group_by': 'date_debut'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ccq_bareme_deplacement_search" model="ir.ui.view">
+        <field name="name">ccq.bareme.deplacement.search</field>
+        <field name="model">ccq.bareme.deplacement</field>
+        <field name="arch" type="xml">
+            <search string="Barèmes de déplacement">
+                <field name="secteur_id"/>
+                <field name="metier_ids"/>
+                <filter name="deplacement" string="Frais de déplacement"
+                        domain="[('type_indemnite', '=', 'deplacement')]"/>
+                <filter name="chambre" string="Chambre et pension"
+                        domain="[('type_indemnite', '=', 'chambre_pension')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="grp_secteur" string="Secteur" context="{'group_by': 'secteur_id'}"/>
+                    <filter name="grp_type" string="Type d'indemnité" context="{'group_by': 'type_indemnite'}"/>
+                    <filter name="grp_date" string="Entrée en vigueur" context="{'group_by': 'date_debut'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>
