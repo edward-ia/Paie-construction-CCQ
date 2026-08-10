@@ -51,14 +51,8 @@
         <field name="country_id" ref="base.ca"/>
     </record>
 
-    <!--
-      Taxe de vente sur l'assurance : le paramètre est DÉCLARÉ mais volontairement
-      SANS VALEUR. Le taux n'a pas été vérifié à la source ; laisser le paramètre
-      vide fait échouer bruyamment le calcul le jour où on l'utilisera, ce qui est
-      infiniment préférable à une taxe silencieusement fausse sur chaque paie.
-    -->
     <record id="rule_param_ccq_taxe_assurance" model="hr.rule.parameter">
-        <field name="name">CCQ — Taxe de vente sur l'assurance (À OBTENIR)</field>
+        <field name="name">CCQ — Taxe de vente sur l'assurance (part de prévoyance seulement)</field>
         <field name="code">l10n_ca_qc_ccq_taxe_assurance</field>
         <field name="country_id" ref="base.ca"/>
     </record>

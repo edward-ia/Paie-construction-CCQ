@@ -19,6 +19,8 @@ access_ccq_taux_salaire_user,ccq.taux.salaire user,model_ccq_taux_salaire,hr.gro
 access_ccq_taux_salaire_manager,ccq.taux.salaire manager,model_ccq_taux_salaire,hr.group_hr_manager,1,1,1,1
 access_ccq_taux_qualification_user,ccq.taux.qualification user,model_ccq_taux_qualification,hr.group_hr_user,1,0,0,0
 access_ccq_taux_qualification_manager,ccq.taux.qualification manager,model_ccq_taux_qualification,hr.group_hr_manager,1,1,1,1
+access_ccq_avantage_social_user,ccq.avantage.social user,model_ccq_avantage_social,hr.group_hr_user,1,0,0,0
+access_ccq_avantage_social_manager,ccq.avantage.social manager,model_ccq_avantage_social,hr.group_hr_manager,1,1,1,1
 access_ccq_bareme_deplacement_user,ccq.bareme.deplacement user,model_ccq_bareme_deplacement,hr.group_hr_user,1,0,0,0
 access_ccq_bareme_deplacement_manager,ccq.bareme.deplacement manager,model_ccq_bareme_deplacement,hr.group_hr_manager,1,1,1,1
 access_ccq_chantier_user,ccq.chantier user,model_ccq_chantier,hr.group_hr_user,1,1,1,0

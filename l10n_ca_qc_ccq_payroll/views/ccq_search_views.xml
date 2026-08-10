@@ -177,6 +177,32 @@
         </field>
     </record>
 
+    <record id="view_ccq_avantage_social_search" model="ir.ui.view">
+        <field name="name">ccq.avantage.social.search</field>
+        <field name="model">ccq.avantage.social</field>
+        <field name="arch" type="xml">
+            <search string="Avantages sociaux">
+                <field name="metier_ids"/>
+                <filter name="en_vigueur" string="En vigueur aujourd'hui"
+                        domain="[('date_debut', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="regle_generale" string="Règle générale"
+                        domain="[('metier_ids', '=', False)]"/>
+                <filter name="regle_particuliere" string="Règle particulière de métier"
+                        domain="[('metier_ids', '!=', False)]"/>
+                <separator/>
+                <filter name="part_salarie" string="Précomptée sur le salaire"
+                        domain="[('payeur', '=', 'salarie')]"/>
+                <filter name="part_employeur" string="À la charge de l'employeur"
+                        domain="[('payeur', '=', 'employeur')]"/>
+                <group>
+                    <filter name="grp_caisse" string="Caisse" context="{'group_by': 'caisse'}"/>
+                    <filter name="grp_payeur" string="Payeur" context="{'group_by': 'payeur'}"/>
+                    <filter name="grp_date" string="Entrée en vigueur" context="{'group_by': 'date_debut'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="view_ccq_feuille_temps_search" model="ir.ui.view">
         <field name="name">ccq.feuille.temps.search</field>
         <field name="model">ccq.feuille.temps</field>

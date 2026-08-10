@@ -1,4 +1,5 @@
 from odoo import models
+from odoo.exceptions import UserError
 
 
 class HrPayslip(models.Model):
@@ -142,11 +143,88 @@ class HrPayslip(models.Model):
         return self._ccq_remuneration(
             'heures_supp_100', self._ccq_majorations()['majoration_100'])
 
-    def _ccq_conges(self):
+    def _ccq_taux_conges(self):
         self.ensure_one()
         p = self._rule_parameter('l10n_ca_qc_ccq_conges')
-        taux = p['conges_annuels'] + p['jours_feries'] + p['maladie']
-        return round(self._ccq_salaire_cotisable() * taux, 2)
+        return p['conges_annuels'] + p['jours_feries'] + p['maladie']
+
+    def _ccq_conges(self):
+        self.ensure_one()
+        return round(self._ccq_salaire_cotisable() * self._ccq_taux_conges(), 2)
+
+    # ------------------------------------------------------------------
+    # Avantages sociaux — part précomptée sur le salaire
+    # ------------------------------------------------------------------
+
+    def _ccq_cotisation_horaire(self, ligne, caisse, payeur, facteur_conges):
+        """Cotisation due pour une heure travaillée sur cette ligne d'heures.
+
+        Lue ligne par ligne comme le taux de salaire : la règle particulière du
+        métier et le pourcentage du taux de convention se lisent tous deux au
+        croisement que porte la ligne, jamais sur une moyenne de la semaine.
+        """
+        self.ensure_one()
+        cotisation = self.env['ccq.avantage.social']._cotisation_applicable(
+            ligne.metier_id, caisse, payeur, ligne.periode, ligne.date)
+        if not cotisation:
+            raise UserError(
+                "Aucune cotisation d'avantages sociaux n'est définie pour la caisse "
+                "« %s », part « %s », métier %s, au %s."
+                % (caisse, payeur,
+                   ligne.metier_id.display_name or "non défini", ligne.date)
+            )
+        return cotisation._montant_horaire(ligne.taux_horaire, facteur_conges)
+
+    def _ccq_avantages_sociaux(self, caisse, payeur):
+        """Somme de (heures travaillées × cotisation horaire) sur la période.
+
+        « Pour chaque heure de travail » (R-20, r. 10, article 13) : les heures
+        supplémentaires comptent une pour une. La majoration rémunère l'heure,
+        elle n'en crée pas une seconde — et le pourcentage de la règle
+        particulière porte sur le taux RÉGULIER, non majoré.
+        """
+        self.ensure_one()
+        facteur_conges = 1.0 + self._ccq_taux_conges()
+        total = sum(
+            ligne.total_heures
+            * self._ccq_cotisation_horaire(ligne, caisse, payeur, facteur_conges)
+            for ligne in self._ccq_lignes_assujetties()
+        )
+        return round(total, 2)
+
+    def _ccq_av_soc_prevoyance(self):
+        self.ensure_one()
+        return self._ccq_avantages_sociaux('prevoyance', 'salarie')
+
+    def _ccq_av_soc_taxe(self):
+        """Taxe de vente sur l'assurance, sur la seule part de prévoyance.
+
+        La caisse de retraite n'est pas de l'assurance : elle n'est pas taxée.
+        """
+        self.ensure_one()
+        taux = self._rule_parameter('l10n_ca_qc_ccq_taxe_assurance')
+        return round(self._ccq_av_soc_prevoyance() * taux, 2)
+
+    def _ccq_av_soc_retraite(self):
+        self.ensure_one()
+        return self._ccq_avantages_sociaux('retraite', 'salarie')
+
+    def _l10n_ca_qc_deductions_rpa(self):
+        """La cotisation à la caisse de retraite réduit le revenu imposable.
+
+        C'est un régime de pension agréé : la retenue se déduit du revenu avant
+        le calcul de l'impôt, au fédéral comme au Québec. La cotisation à la
+        caisse de prévoyance finance une assurance maladie (R-20, r. 10,
+        article 11) et ne se déduit pas.
+        """
+        self.ensure_one()
+        if not self.employee_id.l10n_ca_qc_ccq_assujetti:
+            return super()._l10n_ca_qc_deductions_rpa()
+        return self._ccq_av_soc_retraite()
+
+    # ------------------------------------------------------------------
+    # Assiettes rendues au module de base
+    # ------------------------------------------------------------------
 
     def _ccq_base_hors_r20(self, gross):
         self.ensure_one()

@@ -49,6 +49,47 @@
         <field name="amount_python_compute">result = payslip._ccq_primes()</field>
     </record>
 
+    <!--
+      34 à 36 — Avantages sociaux précomptés sur le salaire.
+
+      Placées après les cotisations gouvernementales et AVANT les impôts, dont la
+      part retraite réduit l'assiette : c'est une cotisation à un régime de pension
+      agréé, portée au module de base par _l10n_ca_qc_deductions_rpa().
+
+      Catégorie DED et montant négatif, comme le RRQ et l'AE : le net de la règle
+      NET est la somme de BASIC et de DED.
+    -->
+
+    <record id="rule_ccq_av_soc_prevoyance" model="hr.salary.rule">
+        <field name="name">Avantages sociaux — assurance (caisse de prévoyance)</field>
+        <field name="code">CCQ_AS_PREVOYANCE</field>
+        <field name="sequence">34</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = - payslip._ccq_av_soc_prevoyance()</field>
+    </record>
+
+    <record id="rule_ccq_av_soc_taxe" model="hr.salary.rule">
+        <field name="name">Taxe sur l'assurance (9 %)</field>
+        <field name="code">CCQ_AS_TAXE</field>
+        <field name="sequence">35</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = - payslip._ccq_av_soc_taxe()</field>
+    </record>
+
+    <record id="rule_ccq_av_soc_retraite" model="hr.salary.rule">
+        <field name="name">Avantages sociaux — retraite</field>
+        <field name="code">CCQ_AS_RETRAITE</field>
+        <field name="sequence">36</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = - payslip._ccq_av_soc_retraite()</field>
+    </record>
+
     <record id="rule_ccq_conges" model="hr.salary.rule">
         <field name="name">Congés, fériés et maladie CCQ (13 %)</field>
         <field name="code">CCQ_CONGES</field>

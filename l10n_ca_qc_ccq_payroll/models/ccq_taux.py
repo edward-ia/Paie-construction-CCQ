@@ -17,19 +17,19 @@ from .ccq_referentiel import PERIODE_SELECTION
 
 
 class CcqTauxSalaire(models.Model):
-    """Taux horaire et avantages sociaux, par croisement de dimensions.
+    """Taux horaire de convention, par croisement de dimensions.
 
     Le salaire d'un salarié de la construction ne se saisit JAMAIS : il se lit ici,
     au croisement métier × secteur × annexe × période, à la date des travaux.
 
-    Le découpage assurance / retraite des avantages sociaux n'est pas cosmétique :
-    la portion RETRAITE est une cotisation à un régime de pension agréé, qui réduit
-    le revenu imposable à la source, fédéral comme provincial. La portion ASSURANCE
-    ne se déduit pas. Les additionner en un seul montant rendrait l'impôt faux.
+    Les cotisations d'avantages sociaux ne figurent pas ici : elles viennent des
+    clauses communes aux quatre conventions sectorielles et ne dépendent donc ni du
+    secteur, ni de l'annexe, ni — sauf règle particulière de métier — du métier.
+    Voir `ccq.avantage.social`.
     """
 
     _name = 'ccq.taux.salaire'
-    _description = "CCQ — Taux de salaire et avantages sociaux (daté)"
+    _description = "CCQ — Taux de salaire (daté)"
     _order = 'date_debut desc, metier_id, secteur_id, periode'
 
     metier_id = fields.Many2one('ccq.metier', string="Métier", required=True, ondelete='cascade')
@@ -39,20 +39,6 @@ class CcqTauxSalaire(models.Model):
     date_debut = fields.Date(string="En vigueur le", required=True)
 
     taux_horaire = fields.Float(string="Taux horaire ($)", digits=(12, 4), required=True)
-    av_soc_retraite_employe = fields.Float(
-        string="Av. sociaux — retraite, employé ($/h)", digits=(12, 4),
-        help="Cotisation à un RPA : DÉDUCTIBLE du revenu imposable à la source.",
-    )
-    av_soc_assurance_employe = fields.Float(
-        string="Av. sociaux — assurance, employé ($/h)", digits=(12, 4),
-        help="Assurance MÉDIC Construction : NON déductible. La taxe de vente sur "
-             "l'assurance s'ajoute à cette portion seulement.",
-    )
-    av_soc_retraite_employeur = fields.Float(
-        string="Av. sociaux — retraite, employeur ($/h)", digits=(12, 4))
-    av_soc_assurance_employeur = fields.Float(
-        string="Av. sociaux — assurance, employeur ($/h)", digits=(12, 4))
-
     note = fields.Text(string="Source")
 
     @api.constrains('annexe_id', 'secteur_id')

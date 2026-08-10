@@ -225,6 +225,20 @@ class HrPayslip(models.Model):
     # Impôts
     # ------------------------------------------------------------------
 
+    def _l10n_ca_qc_deductions_rpa(self):
+        """Cotisations à un régime de pension agréé retenues sur la période.
+
+        Elles se déduisent du revenu avant le calcul de l'impôt — le facteur F du
+        T4127 au fédéral, la déduction correspondante du TP-1015.F au Québec —
+        mais ne réduisent ni le salaire cotisable au RRQ, ni le salaire assurable
+        à l'AE, ni celui du RQAP.
+
+        Aucun régime de ce type n'existe dans la paie de base : le point d'entrée
+        rend zéro et laisse les couches qui en portent un le renseigner.
+        """
+        self.ensure_one()
+        return 0.0
+
     def _l10n_ca_qc_bracket(self, brackets, taxable):
         """Retourne (taux, constante K) du palier correspondant au revenu annuel.
 
@@ -266,7 +280,8 @@ class HrPayslip(models.Model):
         # le RRQ2. La cotisation de base n'est PAS déductible (elle donne un crédit).
         rrq_additional = rrq * (rrq_param['taux_supplementaire'] / rrq_param['taux'])
         rrq_deductible = (rrq_additional + rrq2) * periods
-        taxable = max(0.0, annual - deduction - rrq_deductible)
+        rpa = self._l10n_ca_qc_deductions_rpa() * periods
+        taxable = max(0.0, annual - deduction - rrq_deductible - rpa)
 
         rate, constant = self._l10n_ca_qc_bracket(brackets, taxable)
         # Le montant personnel de base est un crédit, converti au taux du
@@ -307,7 +322,8 @@ class HrPayslip(models.Model):
         # base tombe à 0 donc la part 1 % aussi ; il ne reste que le RRQ2 — conforme
         # à PDOC (la déduction suit la cotisation réelle de la période).
         rrq_additional = rrq * (rrq_param['taux_supplementaire'] / rrq_param['taux'])
-        annual = max(0.0, gross_annual - (rrq_additional + rrq2) * periods)
+        rpa = self._l10n_ca_qc_deductions_rpa() * periods
+        annual = max(0.0, gross_annual - (rrq_additional + rrq2) * periods - rpa)
 
         rate, constant = self._l10n_ca_qc_bracket(brackets, annual)
 

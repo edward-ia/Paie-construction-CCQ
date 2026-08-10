@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      ================================================================
+      COTISATIONS AUX RÉGIMES D'AVANTAGES SOCIAUX
+      ================================================================
+      Deux sources concordantes, sans écart au cent sur les montants patronaux :
+        · Clauses communes aux 4 conventions collectives sectorielles,
+          article 27.03 (PD5145, section XXVII, pages 164 à 167) ;
+        · R-20, r. 10, annexe I, article 1, paragraphe ai) et suivants.
+
+      SANS noupdate : ce sont des montants légaux nationaux, identiques pour tous
+      les employeurs du Québec. Une valeur erronée produit une remise erronée
+      chaque semaine ; elle doit pouvoir être corrigée par mise à jour du module,
+      comme le référentiel des régions.
+
+      Les quatre millésimes de la période conventionnée 2025-2029 sont chargés
+      d'avance : la convention les publie tous, et une grille qu'il faut compléter
+      chaque printemps finit par ne pas l'être.
+    -->
+
+    <!-- ===== Caisse de prévoyance collective — part précomptée au salarié ===== -->
+
+    <record id="av_soc_prevoyance_salarie_2025" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">salarie</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">0.68</field>
+        <field name="note">Clauses communes, article 27.03 A) 2).</field>
+    </record>
+    <record id="av_soc_prevoyance_salarie_2026" model="ccq.avantage.social">
+        <field name="date_debut">2026-04-26</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">salarie</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">0.86</field>
+        <field name="note">Clauses communes, article 27.03 A) 2).</field>
+    </record>
+    <record id="av_soc_prevoyance_salarie_2027" model="ccq.avantage.social">
+        <field name="date_debut">2027-04-25</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">salarie</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">1.06</field>
+        <field name="note">Clauses communes, article 27.03 A) 2).</field>
+    </record>
+    <record id="av_soc_prevoyance_salarie_2028" model="ccq.avantage.social">
+        <field name="date_debut">2028-04-30</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">salarie</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">1.23</field>
+        <field name="note">Clauses communes, article 27.03 A) 2). Au-delà du 29 avril 2029, le montant est indexé au pourcentage d'augmentation de salaire de l'année.</field>
+    </record>
+
+    <!-- ===== Caisse de prévoyance collective — part de l'employeur ===== -->
+
+    <record id="av_soc_prevoyance_employeur_2025" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">employeur</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">2.93</field>
+        <field name="note">Clauses communes, article 27.03 A) 1) ; R-20, r. 10, annexe I.</field>
+    </record>
+    <record id="av_soc_prevoyance_employeur_2026" model="ccq.avantage.social">
+        <field name="date_debut">2026-04-26</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">employeur</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">3.11</field>
+        <field name="note">Clauses communes, article 27.03 A) 1) ; R-20, r. 10, annexe I, article 1 paragraphe ai).</field>
+    </record>
+    <record id="av_soc_prevoyance_employeur_2027" model="ccq.avantage.social">
+        <field name="date_debut">2027-04-25</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">employeur</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">3.31</field>
+        <field name="note">Clauses communes, article 27.03 A) 1) ; R-20, r. 10, annexe I, article 1 paragraphe aj).</field>
+    </record>
+    <record id="av_soc_prevoyance_employeur_2028" model="ccq.avantage.social">
+        <field name="date_debut">2028-04-30</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">employeur</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">3.48</field>
+        <field name="note">Clauses communes, article 27.03 A) 1) ; R-20, r. 10, annexe I, article 1 paragraphe ak).</field>
+    </record>
+
+    <!-- ===== Caisse de retraite — part de l'employeur, Apprentis ===== -->
+
+    <record id="av_soc_retraite_employeur_apprenti_2025" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">apprenti</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">4.09</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I.</field>
+    </record>
+    <record id="av_soc_retraite_employeur_apprenti_2026" model="ccq.avantage.social">
+        <field name="date_debut">2026-04-26</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">apprenti</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">4.29</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I, article 1 paragraphe ai).</field>
+    </record>
+    <record id="av_soc_retraite_employeur_apprenti_2027" model="ccq.avantage.social">
+        <field name="date_debut">2027-04-25</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">apprenti</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">4.50</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I, article 1 paragraphe aj).</field>
+    </record>
+    <record id="av_soc_retraite_employeur_apprenti_2028" model="ccq.avantage.social">
+        <field name="date_debut">2028-04-30</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">apprenti</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">4.68</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I, article 1 paragraphe ak).</field>
+    </record>
+
+    <!-- ===== Caisse de retraite — part de l'employeur, compagnons et occupations ===== -->
+
+    <record id="av_soc_retraite_employeur_autres_2025" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">autres</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">4.96</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I.</field>
+    </record>
+    <record id="av_soc_retraite_employeur_autres_2026" model="ccq.avantage.social">
+        <field name="date_debut">2026-04-26</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">autres</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">5.21</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I, article 1 paragraphe ai).</field>
+    </record>
+    <record id="av_soc_retraite_employeur_autres_2027" model="ccq.avantage.social">
+        <field name="date_debut">2027-04-25</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">autres</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">5.47</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I, article 1 paragraphe aj).</field>
+    </record>
+    <record id="av_soc_retraite_employeur_autres_2028" model="ccq.avantage.social">
+        <field name="date_debut">2028-04-30</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">employeur</field>
+        <field name="application">autres</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">5.69</field>
+        <field name="note">Clauses communes, article 27.03 B) 1) ; R-20, r. 10, annexe I, article 1 paragraphe ak).</field>
+    </record>
+
+    <!--
+      Caisse de retraite — part précomptée au salarié, règle générale.
+      UN SEUL MILLÉSIME, ET C'EST VOULU : l'article 27.03 B) 2) fixe « 0,80 $ pour
+      chaque heure travaillée », sans date d'échéance ni clause d'indexation,
+      contrairement aux trois autres montants. Lui appliquer l'escalier des autres
+      par symétrie produirait un chiffre qui n'existe dans aucun texte.
+    -->
+    <record id="av_soc_retraite_salarie_general" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">salarie</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">0.80</field>
+        <field name="note">Clauses communes, article 27.03 B) 2). S'applique « ou celles fixées par les règles particulières, s'il y en a » : un métier visé par l'article 27.06 est calculé selon sa propre règle, jamais selon ce montant.</field>
+    </record>
+
+    <!--
+      RÈGLE PARTICULIÈRE DU MÉTIER 416 — mécanicien en protection-incendie.
+      Article 27.06, paragraphe 13) d) : la cotisation salariale est un POURCENTAGE
+      du taux de salaire régulier augmenté de l'indemnité de congés annuels
+      obligatoires, de jours fériés chômés et de congés de maladie. La clause
+      précise que ce pourcentage INCLUT la cotisation du premier alinéa de
+      l'article 27.03 B) 2) : il la remplace, il ne s'y ajoute pas.
+      Le même taux vaut pour l'apprenti depuis le 27 avril 2025.
+    -->
+    <record id="av_soc_retraite_salarie_416" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">retraite</field>
+        <field name="payeur">salarie</field>
+        <field name="application">tous</field>
+        <field name="mode">pourcentage</field>
+        <field name="valeur">0.09</field>
+        <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
+        <field name="note">Clauses communes, article 27.06 paragraphe 13) d) et page suivante pour les apprentis.</field>
+    </record>
+</odoo>

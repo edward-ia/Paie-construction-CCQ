@@ -1,6 +1,6 @@
 {
     'name': 'Paie — Québec (Canada)',
-    'version': '19.0.1.15.0',
+    'version': '19.0.1.16.0',
     'category': 'Human Resources/Payroll',
     'summary': "Retenues à la source du Québec : RRQ, RQAP, AE, impôt provincial et fédéral",
     'description': """

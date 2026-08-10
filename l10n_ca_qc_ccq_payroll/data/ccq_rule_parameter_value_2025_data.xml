@@ -32,9 +32,14 @@
     </record>
 
     <!-- Prélèvement CCQ : 0,75 % salarié + 0,75 % employeur = 1,5 %.
-         ⚠️ La base n'est PAS le brut fiscal : c'est le salaire cotisable PLUS le
-         montant des congés et fériés (le 13 %). Minimum de 10 $ par mois, dû même
-         en l'absence d'activité. -->
+         ⚠️ L'assiette est la RÉMUNÉRATION VERSÉE, donc le salaire cotisable SANS
+         l'indemnité de 13 % : R-20, r. 9 article 1 dit « rémunération », alors que
+         R-20 article 1 q) oppose la « rémunération en monnaie courante » aux
+         « indemnités » ; PD5277 page 3 ne demande d'y inclure le 13 % que pour le
+         statut C, l'entrepreneur autonome.
+         ⚠️ Le minimum de 10 $ par période mensuelle ne vise QUE l'employeur et
+         l'entrepreneur autonome (r. 9 article 1, 2e alinéa), jamais la retenue
+         salariale. -->
     <record id="val_ccq_prelevement_2025" model="hr.rule.parameter.value">
         <field name="rule_parameter_id" ref="rule_param_ccq_prelevement"/>
         <field name="date_from">2025-04-27</field>
@@ -89,8 +94,16 @@
         <field name="parameter_value">{'aecq_horaire': 0.03, 'acq_horaire_ic': 0.03, 'min_mensuel': 5.0, 'aecq_annuelle': 240.0, 'mois_cotisation_annuelle': 10}</field>
     </record>
 
-    <!--
-      AUCUNE valeur pour l10n_ca_qc_ccq_taxe_assurance : le taux reste à obtenir.
-      Voir le commentaire dans ccq_rule_parameter_data.xml.
-    -->
+    <!-- Taxe de vente sur l'assurance : 9 %, sur la seule part versée à la caisse
+         de prévoyance collective, part salariale comme part patronale (clauses
+         communes, article 27.03 A) 1) et A) 2) : « selon les pratiques usuelles
+         passées de la CCQ »). Le taux est confirmé par l'arithmétique de l'annexe
+         XIII de R-20, r. 10 : 184,54 / 2 050,46 et 154,82 / 1 720,18 donnent tous
+         deux 9,000 %. La caisse de retraite n'est pas de l'assurance : elle n'est
+         pas taxée. -->
+    <record id="val_ccq_taxe_assurance_2025" model="hr.rule.parameter.value">
+        <field name="rule_parameter_id" ref="rule_param_ccq_taxe_assurance"/>
+        <field name="date_from">2025-04-27</field>
+        <field name="parameter_value">0.09</field>
+    </record>
 </odoo>

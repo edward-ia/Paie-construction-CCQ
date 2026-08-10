@@ -381,10 +381,6 @@
                 <field name="annexe_id"/>
                 <field name="periode"/>
                 <field name="taux_horaire"/>
-                <field name="av_soc_retraite_employe"/>
-                <field name="av_soc_assurance_employe"/>
-                <field name="av_soc_retraite_employeur"/>
-                <field name="av_soc_assurance_employeur"/>
                 <field name="note" optional="hide"/>
             </list>
         </field>
@@ -409,6 +405,28 @@
     <record id="action_ccq_taux_qualification" model="ir.actions.act_window">
         <field name="name">Fonds de qualification</field>
         <field name="res_model">ccq.taux.qualification</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_ccq_avantage_social_list" model="ir.ui.view">
+        <field name="name">ccq.avantage.social.list</field>
+        <field name="model">ccq.avantage.social</field>
+        <field name="arch" type="xml">
+            <list string="Avantages sociaux" editable="bottom">
+                <field name="date_debut"/>
+                <field name="caisse"/>
+                <field name="payeur"/>
+                <field name="application"/>
+                <field name="mode"/>
+                <field name="valeur"/>
+                <field name="metier_ids" widget="many2many_tags"/>
+                <field name="note" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_avantage_social" model="ir.actions.act_window">
+        <field name="name">Avantages sociaux</field>
+        <field name="res_model">ccq.avantage.social</field>
         <field name="view_mode">list</field>
     </record>
 
@@ -467,6 +485,8 @@
               parent="menu_ccq_config" action="action_ccq_taux_salaire" sequence="80"/>
     <menuitem id="menu_ccq_taux_qualification" name="Fonds de qualification"
               parent="menu_ccq_config" action="action_ccq_taux_qualification" sequence="90"/>
+    <menuitem id="menu_ccq_avantage_social" name="Avantages sociaux"
+              parent="menu_ccq_config" action="action_ccq_avantage_social" sequence="95"/>
     <menuitem id="menu_ccq_bareme_deplacement" name="Barèmes de déplacement"
               parent="menu_ccq_config" action="action_ccq_bareme_deplacement" sequence="100"/>
 
