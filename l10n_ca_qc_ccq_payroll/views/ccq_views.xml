@@ -32,6 +32,8 @@
                             <field name="l10n_ca_qc_ccq_assujetti"/>
                             <field name="l10n_ca_qc_ccq_statut"
                                    invisible="not l10n_ca_qc_ccq_assujetti"/>
+                            <field name="l10n_ca_qc_ccq_exclu_fonds_indemnisation"
+                                   invisible="not l10n_ca_qc_ccq_assujetti"/>
                         </group>
                         <group string="Métier"
                                invisible="not l10n_ca_qc_ccq_assujetti">

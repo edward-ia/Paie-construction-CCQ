@@ -223,6 +223,78 @@ class HrPayslip(models.Model):
         return self._ccq_av_soc_retraite()
 
     # ------------------------------------------------------------------
+    # Prélèvement et fonds sectoriels
+    # ------------------------------------------------------------------
+
+    def _ccq_heures_travaillees(self):
+        """Heures travaillées assujetties de la période, sans majoration.
+
+        Les fonds se cotisent « pour chaque heure travaillée » : une heure
+        supplémentaire est une heure, quel que soit le taux auquel elle est payée.
+        Ces heures viennent des feuilles de temps confirmées, jamais du calendrier
+        du contrat, qui ignore où et pour qui le salarié a travaillé.
+        """
+        self.ensure_one()
+        return sum(self._ccq_lignes_assujetties().mapped('total_heures'))
+
+    def _ccq_prelevement(self, part):
+        """Prélèvement de la CCQ — R-20, r. 9, article 1.
+
+        L'assiette est la RÉMUNÉRATION VERSÉE, donc le salaire cotisable SANS
+        l'indemnité de 13 % : le règlement dit « rémunération » là où la loi
+        distingue, à son article 1 q), la « rémunération en monnaie courante » des
+        « indemnités ». L'y inclure serait au surplus circulaire, le 13 % étant
+        calculé sur ce même salaire cotisable.
+
+        Le minimum de 10 $ par période mensuelle du deuxième alinéa n'apparaît pas
+        ici : il ne vise que l'employeur et l'entrepreneur autonome, jamais la
+        retenue salariale, et se règle au rapport mensuel — un bulletin
+        hebdomadaire ne peut pas décider d'un plancher mensuel.
+        """
+        self.ensure_one()
+        taux = self._rule_parameter('l10n_ca_qc_ccq_prelevement')[part]
+        return round(self._ccq_salaire_cotisable() * taux, 2)
+
+    def _ccq_prelevement_salarie(self):
+        self.ensure_one()
+        return self._ccq_prelevement('taux_salarie')
+
+    def _ccq_prelevement_employeur(self):
+        self.ensure_one()
+        return self._ccq_prelevement('taux_employeur')
+
+    def _ccq_fonds_formation(self):
+        """Fonds de formation — R-20, r. 7.1, articles 3 et 5.
+
+        Aucune exclusion d'assiette, contrairement au fonds d'indemnisation : la
+        cotisation est due « pour chaque heure travaillée par chacun de ses
+        salariés », propriétaires et actionnaires compris.
+
+        Le secteur ne change pas le montant. L'article 5, deuxième alinéa, dit
+        seulement que la Commission « porte ces cotisations au volet »
+        correspondant : il décide de la destination, pas du taux.
+        """
+        self.ensure_one()
+        taux = self._rule_parameter('l10n_ca_qc_ccq_fonds_formation')
+        return round(self._ccq_heures_travaillees() * taux, 2)
+
+    def _ccq_fonds_indemnisation(self):
+        """Fonds d'indemnisation — R-20, r. 7.01, article 4.
+
+        Entièrement patronal : l'article 3 n'alimente le fonds que des cotisations
+        versées par un employeur, aucune cotisation salariale n'existe.
+
+        L'assiette exclut les personnes visées au deuxième alinéa de l'article 8,
+        situation ordinaire d'une entreprise de construction dont un propriétaire
+        travaille sur les chantiers.
+        """
+        self.ensure_one()
+        if self.employee_id.l10n_ca_qc_ccq_exclu_fonds_indemnisation:
+            return 0.0
+        taux = self._rule_parameter('l10n_ca_qc_ccq_fonds_indemnisation')
+        return round(self._ccq_heures_travaillees() * taux, 2)
+
+    # ------------------------------------------------------------------
     # Assiettes rendues au module de base
     # ------------------------------------------------------------------
 

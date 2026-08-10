@@ -90,6 +90,54 @@
         <field name="amount_python_compute">result = - payslip._ccq_av_soc_retraite()</field>
     </record>
 
+    <record id="rule_ccq_prelevement_salarie" model="hr.salary.rule">
+        <field name="name">Prélèvement CCQ (0,75 %)</field>
+        <field name="code">CCQ_PRELEVEMENT</field>
+        <field name="sequence">37</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = - payslip._ccq_prelevement_salarie()</field>
+    </record>
+
+    <!--
+      Charges de l'employeur. Catégorie COMP : elles n'entrent pas dans le net.
+
+      Ce sont des PROVISIONS au bulletin hebdomadaire. Les trois se calculent
+      « au cours du mois précédant le rapport mensuel » et se versent avec lui ;
+      l'obligation légale suit donc le rapport, pas la semaine de paie.
+    -->
+
+    <record id="rule_ccq_prelevement_employeur" model="hr.salary.rule">
+        <field name="name">Prélèvement CCQ — part employeur (0,75 %)</field>
+        <field name="code">CCQ_PRELEVEMENT_EMP</field>
+        <field name="sequence">111</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_prelevement_employeur()</field>
+    </record>
+
+    <record id="rule_ccq_fonds_formation" model="hr.salary.rule">
+        <field name="name">Fonds de formation</field>
+        <field name="code">CCQ_FORMATION</field>
+        <field name="sequence">112</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_fonds_formation()</field>
+    </record>
+
+    <record id="rule_ccq_fonds_indemnisation" model="hr.salary.rule">
+        <field name="name">Fonds d'indemnisation</field>
+        <field name="code">CCQ_INDEMNISATION</field>
+        <field name="sequence">113</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_fonds_indemnisation()</field>
+    </record>
+
     <record id="rule_ccq_conges" model="hr.salary.rule">
         <field name="name">Congés, fériés et maladie CCQ (13 %)</field>
         <field name="code">CCQ_CONGES</field>

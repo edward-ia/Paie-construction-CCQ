@@ -46,6 +46,16 @@ class HrEmployee(models.Model):
              "du tableau B ne servent qu'aux situations particulières et commandent "
              "des exceptions de cotisation.",
     )
+    l10n_ca_qc_ccq_exclu_fonds_indemnisation = fields.Boolean(
+        string="Exclu du fonds d'indemnisation",
+        help="L'employeur ne verse pas la cotisation au fonds d'indemnisation sur les "
+             "heures des personnes visées au deuxième alinéa de l'article 8 du chapitre "
+             "R-20, r. 7.01 : membre, administrateur ou dirigeant de la société ; "
+             "actionnaire détenant 20 % ou plus des actions avec droit de vote ; "
+             "répondant d'une licence de la Régie du bâtiment ; représentant désigné ; "
+             "et le conjoint ou le parent en ligne directe de l'une de ces personnes. "
+             "La cotisation au fonds de formation, elle, reste due sur ces mêmes heures.",
+    )
     l10n_ca_qc_ccq_carte_competence = fields.Char(
         string="Certificat de compétence",
         help="Numéro du certificat délivré par la CCQ.")

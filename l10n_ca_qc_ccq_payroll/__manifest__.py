@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.9.0',
+    'version': '19.0.0.10.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",
@@ -33,17 +33,29 @@ CONTENU :
     vertu de la loi R-20 de l'assiette de la cotisation aux normes du travail ;
   - avantages sociaux précomptés sur le salaire : caisse de prévoyance collective,
     taxe sur l'assurance et caisse de retraite, cette dernière déduite du revenu
-    imposable à la source comme toute cotisation à un régime de pension agréé.
+    imposable à la source comme toute cotisation à un régime de pension agréé ;
+  - prélèvement de la CCQ, parts salariale et patronale, sur la rémunération
+    versée ;
+  - cotisations patronales au fonds de formation et au fonds d'indemnisation,
+    calculées sur les heures des feuilles de temps, chacune avec sa propre
+    assiette — seul le fonds d'indemnisation exclut les propriétaires,
+    actionnaires principaux, répondants de licence et représentants désignés.
 
-NON AUTOMATISÉ : le prélèvement, la contribution sectorielle, la cotisation
-syndicale, les charges patronales en dollars l'heure, les frais de déplacement,
-le rapport mensuel et les remises.
+NON AUTOMATISÉ : la contribution sectorielle, la cotisation syndicale, les
+cotisations aux associations patronales, les avantages sociaux à la charge de
+l'employeur, les frais de déplacement, le rapport mensuel et les remises.
 
 Sources officielles :
   - CCQ, « Guide pour remplir le rapport mensuel » (PD5277)
   - CCQ, convention collective institutionnel et commercial 2025-2029 (PD5145)
   - Règlement sur les régimes complémentaires d'avantages sociaux dans
     l'industrie de la construction (chapitre R-20, r. 10)
+  - Règlement de prélèvement de la Commission de la construction du Québec
+    (chapitre R-20, r. 9)
+  - Règlement sur le fonds de formation des salariés de l'industrie de la
+    construction (chapitre R-20, r. 7.1)
+  - Règlement sur le fonds d'indemnisation des salariés de l'industrie de la
+    construction (chapitre R-20, r. 7.01)
   - ACQ, « Frais de déplacement 2025-2028 »
 
 Les taux et barèmes sont des données datées : ils ne doivent jamais être modifiés
