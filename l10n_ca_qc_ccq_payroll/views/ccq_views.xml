@@ -421,6 +421,8 @@
                 <field name="application"/>
                 <field name="mode"/>
                 <field name="valeur"/>
+                <field name="ajustement"/>
+                <field name="cumul_regle_generale"/>
                 <field name="metier_ids" widget="many2many_tags"/>
                 <field name="note" optional="hide"/>
             </list>

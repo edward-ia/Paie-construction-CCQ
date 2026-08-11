@@ -153,29 +153,63 @@ class HrPayslip(models.Model):
         return round(self._ccq_salaire_cotisable() * self._ccq_taux_conges(), 2)
 
     # ------------------------------------------------------------------
-    # Avantages sociaux — part précomptée sur le salaire
+    # Avantages sociaux
     # ------------------------------------------------------------------
 
-    def _ccq_cotisation_horaire(self, ligne, caisse, payeur, facteur_conges):
+    def _ccq_taux_compagnon(self, ligne):
+        """Taux du compagnon au croisement que porte la ligne d'heures.
+
+        La règle particulière du 416 calcule la cotisation patronale de
+        prévoyance sur « le taux de salaire du compagnon » (clause 27.06,
+        paragraphe 13) a)), et non sur celui de la personne payée : un apprenti
+        de première période donne donc le même montant qu'un compagnon. Prendre
+        le taux de la ligne sous-paierait la cotisation de tous les apprentis.
+        """
+        self.ensure_one()
+        taux = self.env['ccq.taux.salaire']._taux_applicable(
+            ligne.metier_id, ligne.secteur_id, ligne.annexe_id, 'compagnon', ligne.date)
+        if not taux:
+            raise UserError(
+                "Le taux du compagnon est introuvable dans la grille pour le métier "
+                "%s, secteur %s, annexe %s, au %s. Une cotisation d'avantages "
+                "sociaux s'y calcule."
+                % (ligne.metier_id.display_name or "non défini",
+                   ligne.secteur_id.display_name or "non défini",
+                   ligne.annexe_id.display_name or "non défini", ligne.date)
+            )
+        return taux.taux_horaire
+
+    def _ccq_cotisation_horaire(self, ligne, caisse, payeur, facteur_conges, obligatoire=True):
         """Cotisation due pour une heure travaillée sur cette ligne d'heures.
 
         Lue ligne par ligne comme le taux de salaire : la règle particulière du
         métier et le pourcentage du taux de convention se lisent tous deux au
         croisement que porte la ligne, jamais sur une moyenne de la semaine.
+
+        `obligatoire` distingue les caisses que tout salarié assujetti alimente
+        de la caisse supplémentaire d'assurance, qui n'existe que là où une règle
+        particulière la crée. Pour celle-là, l'absence d'enregistrement est une
+        cotisation nulle, pas une erreur de configuration.
         """
         self.ensure_one()
-        cotisation = self.env['ccq.avantage.social']._cotisation_applicable(
+        cotisations = self.env['ccq.avantage.social']._cotisation_applicable(
             ligne.metier_id, caisse, payeur, ligne.periode, ligne.date)
-        if not cotisation:
+        if not cotisations:
+            if not obligatoire:
+                return 0.0
             raise UserError(
                 "Aucune cotisation d'avantages sociaux n'est définie pour la caisse "
                 "« %s », part « %s », métier %s, au %s."
                 % (caisse, payeur,
                    ligne.metier_id.display_name or "non défini", ligne.date)
             )
-        return cotisation._montant_horaire(ligne.taux_horaire, facteur_conges)
+        taux_compagnon = 0.0
+        if 'pct_taux_compagnon' in cotisations.mapped('mode'):
+            taux_compagnon = self._ccq_taux_compagnon(ligne)
+        return cotisations._montant_horaire(
+            ligne.taux_horaire, taux_compagnon, facteur_conges)
 
-    def _ccq_avantages_sociaux(self, caisse, payeur):
+    def _ccq_avantages_sociaux(self, caisse, payeur, obligatoire=True):
         """Somme de (heures travaillées × cotisation horaire) sur la période.
 
         « Pour chaque heure de travail » (R-20, r. 10, article 13) : les heures
@@ -187,27 +221,44 @@ class HrPayslip(models.Model):
         facteur_conges = 1.0 + self._ccq_taux_conges()
         total = sum(
             ligne.total_heures
-            * self._ccq_cotisation_horaire(ligne, caisse, payeur, facteur_conges)
+            * self._ccq_cotisation_horaire(
+                ligne, caisse, payeur, facteur_conges, obligatoire)
             for ligne in self._ccq_lignes_assujetties()
         )
         return round(total, 2)
 
-    def _ccq_av_soc_prevoyance(self):
-        self.ensure_one()
-        return self._ccq_avantages_sociaux('prevoyance', 'salarie')
+    def _ccq_av_soc_assurance(self, payeur):
+        """Cotisations d'assurance : prévoyance et caisse supplémentaire réunies.
 
-    def _ccq_av_soc_taxe(self):
-        """Taxe de vente sur l'assurance, sur la seule part de prévoyance.
+        Deux caisses au sens du règlement, une seule ligne au bulletin. R-20,
+        r. 10, article 13 les distingue parce que le dernier alinéa de son
+        annexe I verse à la caisse supplémentaire la part des cotisations
+        conventionnelles qui excède les montants réglementaires ; la distinction
+        sert au rapport mensuel, pas au calcul de la paie, où les deux sommes
+        sont dues au même titre et à la même échéance.
+        """
+        self.ensure_one()
+        return round(
+            self._ccq_avantages_sociaux('prevoyance', payeur)
+            + self._ccq_avantages_sociaux('supplementaire', payeur, obligatoire=False),
+            2)
+
+    def _ccq_av_soc_taxe(self, payeur):
+        """Taxe de vente sur les seules cotisations d'assurance.
 
         La caisse de retraite n'est pas de l'assurance : elle n'est pas taxée.
+        La clause 27.03 A) prélève les taxes « selon les pratiques usuelles
+        passées de la CCQ » sans distinguer la caisse ni le payeur, et l'article
+        13 de R-20, r. 10 fait transiter les sommes de la caisse supplémentaire
+        par la caisse de prévoyance, d'où les primes d'assurance sont payées.
         """
         self.ensure_one()
         taux = self._rule_parameter('l10n_ca_qc_ccq_taxe_assurance')
-        return round(self._ccq_av_soc_prevoyance() * taux, 2)
+        return round(self._ccq_av_soc_assurance(payeur) * taux, 2)
 
-    def _ccq_av_soc_retraite(self):
+    def _ccq_av_soc_retraite(self, payeur):
         self.ensure_one()
-        return self._ccq_avantages_sociaux('retraite', 'salarie')
+        return self._ccq_avantages_sociaux('retraite', payeur)
 
     def _l10n_ca_qc_deductions_rpa(self):
         """La cotisation à la caisse de retraite réduit le revenu imposable.
@@ -216,11 +267,14 @@ class HrPayslip(models.Model):
         le calcul de l'impôt, au fédéral comme au Québec. La cotisation à la
         caisse de prévoyance finance une assurance maladie (R-20, r. 10,
         article 11) et ne se déduit pas.
+
+        Seule la part précomptée au salarié entre ici : la cotisation patronale
+        n'est pas son revenu, elle ne peut donc pas en être déduite.
         """
         self.ensure_one()
         if not self.employee_id.l10n_ca_qc_ccq_assujetti:
             return super()._l10n_ca_qc_deductions_rpa()
-        return self._ccq_av_soc_retraite()
+        return self._ccq_av_soc_retraite('salarie')
 
     # ------------------------------------------------------------------
     # Prélèvement et fonds sectoriels

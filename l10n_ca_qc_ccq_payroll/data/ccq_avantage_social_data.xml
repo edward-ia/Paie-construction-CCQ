@@ -206,9 +206,60 @@
         <field name="caisse">retraite</field>
         <field name="payeur">salarie</field>
         <field name="application">tous</field>
-        <field name="mode">pourcentage</field>
+        <field name="mode">pct_taux_majore</field>
         <field name="valeur">0.09</field>
         <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
         <field name="note">Clauses communes, article 27.06 paragraphe 13) d) et page suivante pour les apprentis.</field>
+    </record>
+
+    <!--
+      Article 27.06, paragraphe 13) a) : la cotisation patronale de prévoyance du
+      416 est celle du 27.03 A) 1), AUGMENTÉE de 1,5 % du taux de salaire du
+      compagnon, moins 0,10 $ par heure travaillée.
+
+      ⚠️ « du taux de salaire du COMPAGNON », y compris sur le bulletin d'un
+      apprenti : la formule ne se calcule pas sur le taux de la personne payée.
+
+      Le montant commun n'est pas recopié ici. Il a quatre millésimes, celui-ci
+      n'en a aucun : la clause fixe un pourcentage et un ajustement, sans date
+      d'échéance. Recopier le 3,11 $ obligerait à créer une règle particulière à
+      chaque printemps, et un printemps oublié sous-paierait la cotisation.
+    -->
+    <record id="av_soc_prevoyance_employeur_416" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">prevoyance</field>
+        <field name="payeur">employeur</field>
+        <field name="application">tous</field>
+        <field name="mode">pct_taux_compagnon</field>
+        <field name="valeur">0.015</field>
+        <field name="ajustement">-0.10</field>
+        <field name="cumul_regle_generale" eval="True"/>
+        <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
+        <field name="note">Clauses communes, article 27.06 paragraphe 13) a). S'ajoute au montant de l'article 27.03 A) 1), qui reste lu dans la règle générale.</field>
+    </record>
+
+    <!--
+      Article 27.06, paragraphe 13) c) : 0,02 $ par heure travaillée versés à la
+      caisse supplémentaire d'assurance, pour l'achat par le salarié de lunettes
+      de sécurité avec verres correcteurs — c'est ce versement qui libère
+      l'employeur de son obligation de fourniture.
+
+      ⚠️ TROISIÈME « 0,02 $/h » DU MODULE, à ne confondre ni avec le fonds
+      d'indemnisation (R-20, r. 7.01, article 4 : employeur, autre destination)
+      ni avec la contribution sectorielle (salarié). Trois postes au même
+      montant, trois payeurs ou destinations différents.
+
+      Aucune règle générale n'alimente cette caisse : elle n'existe que là où une
+      règle particulière la crée, et son absence vaut cotisation nulle.
+    -->
+    <record id="av_soc_supplementaire_employeur_416" model="ccq.avantage.social">
+        <field name="date_debut">2025-04-27</field>
+        <field name="caisse">supplementaire</field>
+        <field name="payeur">employeur</field>
+        <field name="application">tous</field>
+        <field name="mode">fixe</field>
+        <field name="valeur">0.02</field>
+        <field name="metier_ids" eval="[(6, 0, [ref('metier_416')])]"/>
+        <field name="note">Clauses communes, article 27.06 paragraphe 13) c) ; R-20, r. 10, annexe I, dernier alinéa, qui verse à la caisse supplémentaire les cotisations conventionnelles excédant les montants réglementaires.</field>
     </record>
 </odoo>

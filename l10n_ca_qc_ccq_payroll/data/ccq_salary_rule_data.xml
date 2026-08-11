@@ -61,13 +61,13 @@
     -->
 
     <record id="rule_ccq_av_soc_prevoyance" model="hr.salary.rule">
-        <field name="name">Avantages sociaux — assurance (caisse de prévoyance)</field>
+        <field name="name">Avantages sociaux — assurance</field>
         <field name="code">CCQ_AS_PREVOYANCE</field>
         <field name="sequence">34</field>
         <field name="category_id" ref="hr_payroll.DED"/>
         <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = - payslip._ccq_av_soc_prevoyance()</field>
+        <field name="amount_python_compute">result = - payslip._ccq_av_soc_assurance('salarie')</field>
     </record>
 
     <record id="rule_ccq_av_soc_taxe" model="hr.salary.rule">
@@ -77,7 +77,7 @@
         <field name="category_id" ref="hr_payroll.DED"/>
         <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = - payslip._ccq_av_soc_taxe()</field>
+        <field name="amount_python_compute">result = - payslip._ccq_av_soc_taxe('salarie')</field>
     </record>
 
     <record id="rule_ccq_av_soc_retraite" model="hr.salary.rule">
@@ -87,7 +87,7 @@
         <field name="category_id" ref="hr_payroll.DED"/>
         <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = - payslip._ccq_av_soc_retraite()</field>
+        <field name="amount_python_compute">result = - payslip._ccq_av_soc_retraite('salarie')</field>
     </record>
 
     <record id="rule_ccq_prelevement_salarie" model="hr.salary.rule">
@@ -136,6 +136,46 @@
         <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = payslip._ccq_fonds_indemnisation()</field>
+    </record>
+
+    <!--
+      114 à 116 — Avantages sociaux à la charge de l'employeur.
+
+      Poste patronal le plus lourd du bulletin, plus élevé à lui seul que toutes
+      les cotisations gouvernementales réunies. La ligne d'assurance porte les
+      deux caisses ensemble : la caisse de prévoyance et la caisse supplémentaire
+      sont dues au même titre et à la même échéance, et leur distinction ne sert
+      qu'au rapport mensuel.
+    -->
+
+    <record id="rule_ccq_av_soc_prevoyance_emp" model="hr.salary.rule">
+        <field name="name">Avantages sociaux — assurance (part employeur)</field>
+        <field name="code">CCQ_AS_PREVOYANCE_EMP</field>
+        <field name="sequence">114</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_av_soc_assurance('employeur')</field>
+    </record>
+
+    <record id="rule_ccq_av_soc_taxe_emp" model="hr.salary.rule">
+        <field name="name">Taxe sur l'assurance (9 %) — part employeur</field>
+        <field name="code">CCQ_AS_TAXE_EMP</field>
+        <field name="sequence">115</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_av_soc_taxe('employeur')</field>
+    </record>
+
+    <record id="rule_ccq_av_soc_retraite_emp" model="hr.salary.rule">
+        <field name="name">Avantages sociaux — retraite (part employeur)</field>
+        <field name="code">CCQ_AS_RETRAITE_EMP</field>
+        <field name="sequence">116</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_av_soc_retraite('employeur')</field>
     </record>
 
     <record id="rule_ccq_conges" model="hr.salary.rule">

@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.10.0',
+    'version': '19.0.0.11.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",
@@ -34,6 +34,10 @@ CONTENU :
   - avantages sociaux précomptés sur le salaire : caisse de prévoyance collective,
     taxe sur l'assurance et caisse de retraite, cette dernière déduite du revenu
     imposable à la source comme toute cotisation à un régime de pension agréé ;
+  - avantages sociaux à la charge de l'employeur : caisses d'assurance, taxe et
+    caisse de retraite, celle-ci distinguant l'Apprenti des autres salariés, avec
+    les règles particulières de métier qui s'ajoutent au montant des clauses
+    communes au lieu de le remplacer ;
   - prélèvement de la CCQ, parts salariale et patronale, sur la rémunération
     versée ;
   - cotisations patronales au fonds de formation et au fonds d'indemnisation,
@@ -42,8 +46,8 @@ CONTENU :
     actionnaires principaux, répondants de licence et représentants désignés.
 
 NON AUTOMATISÉ : la contribution sectorielle, la cotisation syndicale, les
-cotisations aux associations patronales, les avantages sociaux à la charge de
-l'employeur, les frais de déplacement, le rapport mensuel et les remises.
+cotisations aux associations patronales, les frais de déplacement, le rapport
+mensuel et les remises.
 
 Sources officielles :
   - CCQ, « Guide pour remplir le rapport mensuel » (PD5277)
