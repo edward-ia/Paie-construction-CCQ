@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.11.0',
+    'version': '19.0.0.12.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",
@@ -45,9 +45,9 @@ CONTENU :
     assiette — seul le fonds d'indemnisation exclut les propriétaires,
     actionnaires principaux, répondants de licence et représentants désignés.
 
-NON AUTOMATISÉ : la contribution sectorielle, la cotisation syndicale, les
-cotisations aux associations patronales, les frais de déplacement, le rapport
-mensuel et les remises.
+NON AUTOMATISÉ : la cotisation syndicale, les cotisations aux associations
+patronales, les frais de déplacement, l'heure de début et de fin exigée au
+registre, le donneur d'ouvrage, le rapport mensuel et les remises.
 
 Sources officielles :
   - CCQ, « Guide pour remplir le rapport mensuel » (PD5277)

@@ -348,6 +348,49 @@ class HrPayslip(models.Model):
         taux = self._rule_parameter('l10n_ca_qc_ccq_fonds_indemnisation')
         return round(self._ccq_heures_travaillees() * taux, 2)
 
+    def _ccq_contribution_sectorielle(self, payeur):
+        """Contribution sectorielle — convention IC 2025-2029, article 7.09.
+
+        La convention l'appelle « caisse d'éducation syndicale », la Commission
+        « contribution sectorielle » au rapport mensuel : c'est le même poste.
+        Le salarié y verse « une cotisation de 0,02 $ pour chaque heure
+        travaillée », précomptée sur sa paie et transmise avec le rapport
+        mensuel. Aucune exclusion d'assiette n'est prévue, contrairement au
+        fonds d'indemnisation.
+
+        Le payeur dépend du SECTEUR et non de l'entreprise : la contribution est
+        salariale en institutionnel-commercial, en industriel et en génie civil,
+        patronale en résidentiel. Une semaine partagée entre deux secteurs se
+        répartit donc entre les deux lignes du bulletin, d'où ce regroupement
+        par secteur plutôt qu'un total d'heures unique.
+
+        Elle ne réduit pas le revenu imposable : ce n'est pas un régime de
+        pension agréé, et aucune déduction à la source n'est prévue pour ce type
+        de cotisation.
+        """
+        self.ensure_one()
+        bareme = self._rule_parameter('l10n_ca_qc_ccq_contribution_sectorielle')
+        total = 0.0
+        for ligne in self._ccq_lignes_assujetties():
+            regle = bareme.get(ligne.secteur_id.code)
+            if not regle:
+                raise UserError(
+                    "Aucune contribution sectorielle n'est paramétrée pour le "
+                    "secteur %s, au %s."
+                    % (ligne.secteur_id.display_name or "non défini", ligne.date)
+                )
+            if regle['payeur'] == payeur:
+                total += ligne.total_heures * regle['taux']
+        return round(total, 2)
+
+    def _ccq_contribution_sectorielle_salarie(self):
+        self.ensure_one()
+        return self._ccq_contribution_sectorielle('salarie')
+
+    def _ccq_contribution_sectorielle_employeur(self):
+        self.ensure_one()
+        return self._ccq_contribution_sectorielle('employeur')
+
     # ------------------------------------------------------------------
     # Assiettes rendues au module de base
     # ------------------------------------------------------------------

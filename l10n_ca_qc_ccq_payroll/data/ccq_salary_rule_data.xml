@@ -100,6 +100,16 @@
         <field name="amount_python_compute">result = - payslip._ccq_prelevement_salarie()</field>
     </record>
 
+    <record id="rule_ccq_contribution_sectorielle" model="hr.salary.rule">
+        <field name="name">Contribution sectorielle</field>
+        <field name="code">CCQ_CONTRIB_SECT</field>
+        <field name="sequence">38</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = - payslip._ccq_contribution_sectorielle_salarie()</field>
+    </record>
+
     <!--
       Charges de l'employeur. Catégorie COMP : elles n'entrent pas dans le net.
 
@@ -176,6 +186,16 @@
         <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = payslip._ccq_av_soc_retraite('employeur')</field>
+    </record>
+
+    <record id="rule_ccq_contribution_sectorielle_emp" model="hr.salary.rule">
+        <field name="name">Contribution sectorielle — part employeur</field>
+        <field name="code">CCQ_CONTRIB_SECT_EMP</field>
+        <field name="sequence">117</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_contribution_sectorielle_employeur()</field>
     </record>
 
     <record id="rule_ccq_conges" model="hr.salary.rule">
