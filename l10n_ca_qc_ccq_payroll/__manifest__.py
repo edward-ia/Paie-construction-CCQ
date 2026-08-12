@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.18.0',
+    'version': '19.0.0.19.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",
@@ -50,11 +50,21 @@ CONTENU :
     sectorielle à l'ACQ ou à l'ACRGTQ selon le secteur ;
   - avantage imposable des régimes d'assurance, ajouté au revenu imposable du
     Québec et au salaire admissible au RRQ, mais ni au fédéral, ni au RQAP, ni
-    à l'assurance-emploi.
+    à l'assurance-emploi ;
+  - exceptions de cotisation liées aux codes de statut du tableau B, appliquées
+    heure par heure, et frais de participation aux régimes sur les heures dont
+    l'employeur maintient volontairement les avantages sociaux ;
+  - registre légal : heure de début, interruptions, reprise et fin de chaque
+    journée, et ventilation des heures par chantier et par donneur d'ouvrage ;
+  - rapport mensuel à la Commission : déclarations ventilées selon les sept
+    dimensions, sommes à remettre reprises des bulletins de la période, minimums
+    mensuels du prélèvement et de la cotisation à l'AECQ, cotisation annuelle du
+    rapport d'octobre, et avis d'inactivité pour une période sans travaux ;
+  - alerte d'expiration des certificats de compétence.
 
-NON AUTOMATISÉ : la cotisation syndicale, les frais de déplacement, les
-exceptions liées aux codes de statut du tableau B, l'heure de début et de fin
-exigée au registre, le donneur d'ouvrage, le rapport mensuel et les remises.
+NON AUTOMATISÉ : la cotisation syndicale, dont le montant est communiqué par un
+avis de la Commission à l'employeur, les frais de déplacement, et la transmission
+du rapport mensuel, qui exige une autorisation de la Commission.
 
 Sources officielles :
   - CCQ, « Guide pour remplir le rapport mensuel » (PD5277)
@@ -89,9 +99,11 @@ reste, pour pouvoir rejouer l'historique.
         'data/ccq_avantage_social_data.xml',
         'data/ccq_avantage_imposable_data.xml',
         'data/ccq_salary_rule_data.xml',
+        'data/ccq_cron_data.xml',
         'views/ccq_views.xml',
         'views/ccq_search_views.xml',
         'report/hr_payslip_bulletin_report.xml',
+        'report/ccq_rapport_mensuel_report.xml',
     ],
     'installable': True,
     'application': False,

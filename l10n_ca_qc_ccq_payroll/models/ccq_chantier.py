@@ -24,7 +24,11 @@ class CcqChantier(models.Model):
 
     name = fields.Char(string="Nom du chantier", required=True)
     code = fields.Char(string="Numéro de chantier", help="Numéro attribué par la CCQ, s'il y a lieu.")
-    partner_id = fields.Many2one('res.partner', string="Client")
+    partner_id = fields.Many2one(
+        'res.partner', string="Donneur d'ouvrage",
+        help="Celui qui vous a confié les travaux — le client du projet. Le registre "
+             "légal exige les heures ventilées par chantier ET par donneur d'ouvrage "
+             "(R-20, article 82 b.0.1) et r. 11, article 8).")
 
     assujetti = fields.Boolean(
         string="Assujetti à la loi R-20", default=True,

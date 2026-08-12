@@ -225,6 +225,35 @@
         <field name="amount_python_compute">result = payslip._ccq_avantage_imposable()</field>
     </record>
 
+    <!--
+      Frais de participation aux régimes — R-20 article 126.0.2.
+      Le prix du maintien volontaire des avantages sociaux sur des heures qui
+      sortent du champ de la loi : 0,075 $ l'heure à la charge de l'employeur et
+      autant retenu au salarié. Ces deux règles ne produisent un montant que sur
+      les heures portant un code de statut A, E, H, I ou J ; elles restent à zéro
+      pour un salarié ordinaire.
+    -->
+
+    <record id="rule_ccq_frais_participation" model="hr.salary.rule">
+        <field name="name">Frais de participation aux régimes</field>
+        <field name="code">CCQ_FRAIS_PARTICIPATION</field>
+        <field name="sequence">39</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = - payslip._ccq_frais_participation()</field>
+    </record>
+
+    <record id="rule_ccq_frais_participation_emp" model="hr.salary.rule">
+        <field name="name">Frais de participation aux régimes — part de l'employeur</field>
+        <field name="code">CCQ_FRAIS_PARTICIPATION_EMP</field>
+        <field name="sequence">120</field>
+        <field name="category_id" ref="hr_payroll.COMP"/>
+        <field name="struct_id" ref="l10n_ca_qc_hr_payroll.structure_qc_regular"/>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip._ccq_frais_participation()</field>
+    </record>
+
     <record id="rule_ccq_conges" model="hr.salary.rule">
         <field name="name">Congés, fériés et maladie CCQ (13 %)</field>
         <field name="code">CCQ_CONGES</field>

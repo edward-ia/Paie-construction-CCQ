@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_ccq_rapport_mensuel" model="ir.actions.report">
+        <field name="name">Rapport mensuel CCQ</field>
+        <field name="model">ccq.rapport.mensuel</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_ca_qc_ccq_payroll.report_ccq_rapport_mensuel</field>
+        <field name="report_file">l10n_ca_qc_ccq_payroll.report_ccq_rapport_mensuel</field>
+        <field name="binding_model_id" ref="model_ccq_rapport_mensuel"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">object.name</field>
+    </record>
+
+    <template id="report_ccq_rapport_mensuel">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="mb-1" t-out="o.name"/>
+                        <p class="text-muted mt-0">
+                            Période du <span t-out="o.date_debut" t-options="{'widget': 'date'}"/>
+                            au <span t-out="o.date_fin" t-options="{'widget': 'date'}"/> —
+                            à transmettre au plus tard le
+                            <span t-out="o.date_echeance" t-options="{'widget': 'date'}"/>
+                        </p>
+
+                        <div t-if="o.inactif" class="alert alert-warning" role="alert">
+                            <strong>Avis d'inactivité.</strong> Aucune heure n'est déclarable
+                            pour cette période. Le rapport doit être transmis quand même.
+                        </div>
+
+                        <table t-if="not o.inactif" class="table table-sm mt-4">
+                            <thead>
+                                <tr>
+                                    <th>Salarié</th>
+                                    <th>Identification</th>
+                                    <th>Métier</th>
+                                    <th>Pér.</th>
+                                    <th>St.</th>
+                                    <th>Sect.</th>
+                                    <th>Ann.</th>
+                                    <th>Rég.</th>
+                                    <th class="text-end">Rég.</th>
+                                    <th class="text-end">+50 %</th>
+                                    <th class="text-end">+100 %</th>
+                                    <th class="text-end">Sem.</th>
+                                    <th class="text-end">Salaire</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.ligne_ids" t-as="ligne">
+                                    <td t-out="ligne.employee_id.name"/>
+                                    <td t-out="ligne.identifiant"/>
+                                    <td t-out="ligne.metier_id.code or ''"/>
+                                    <td t-out="ligne.periode or ''"/>
+                                    <td t-out="ligne.statut or ''"/>
+                                    <td t-out="ligne.secteur_id.code or ''"/>
+                                    <td t-out="ligne.annexe_id.code or ''"/>
+                                    <td t-out="ligne.region_id.code or ''"/>
+                                    <td class="text-end" t-out="ligne.heures_regulieres"/>
+                                    <td class="text-end" t-out="ligne.heures_supp_50"/>
+                                    <td class="text-end" t-out="ligne.heures_supp_100"/>
+                                    <td class="text-end" t-out="ligne.semaines_travaillees"/>
+                                    <td class="text-end" t-out="ligne.salaire"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                </tr>
+                                <tr class="border-top">
+                                    <td colspan="8"><strong>Total</strong></td>
+                                    <td class="text-end" colspan="3"><strong
+                                        t-out="o.total_heures"/></td>
+                                    <td/>
+                                    <td class="text-end"><strong t-out="o.total_salaire"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4 class="mt-4">Sommes à remettre</h4>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr><td>Prélèvement</td>
+                                    <td class="text-end" t-out="o.montant_prelevement"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Congés, jours fériés et maladie (13 %)</td>
+                                    <td class="text-end" t-out="o.montant_conges"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Caisses d'assurance</td>
+                                    <td class="text-end" t-out="o.montant_assurance"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Taxe sur l'assurance</td>
+                                    <td class="text-end" t-out="o.montant_taxe_assurance"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Caisse de retraite</td>
+                                    <td class="text-end" t-out="o.montant_retraite"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Contribution sectorielle</td>
+                                    <td class="text-end" t-out="o.montant_contribution_sectorielle"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Fonds de formation</td>
+                                    <td class="text-end" t-out="o.montant_formation"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Fonds d'indemnisation</td>
+                                    <td class="text-end" t-out="o.montant_indemnisation"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr t-if="o.montant_frais_participation">
+                                    <td>Frais de participation aux régimes</td>
+                                    <td class="text-end" t-out="o.montant_frais_participation"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr><td>Cotisations aux associations patronales</td>
+                                    <td class="text-end" t-out="o.montant_associations_patronales"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr t-if="o.montant_aecq_annuelle">
+                                    <td>Cotisation annuelle à l'AECQ</td>
+                                    <td class="text-end" t-out="o.montant_aecq_annuelle"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></tr>
+                                <tr class="table-active border-top">
+                                    <td><strong>Total à remettre</strong></td>
+                                    <td class="text-end"><strong t-out="o.total_a_remettre"
+                                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p t-if="o.ajustement_prelevement or o.ajustement_aecq"
+                           class="text-muted mt-0" style="font-size:9px;">
+                            Les montants ci-dessus comprennent les compléments portant la
+                            remise aux minimums de la période mensuelle :
+                            <span t-if="o.ajustement_prelevement">
+                                prélèvement de l'employeur, <span t-out="o.ajustement_prelevement"
+                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>.
+                            </span>
+                            <span t-if="o.ajustement_aecq">
+                                cotisation à l'AECQ, <span t-out="o.ajustement_aecq"
+                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>.
+                            </span>
+                        </p>
+
+                        <p class="text-muted mt-4" style="font-size:9px;">
+                            Ce document sert à saisir la déclaration dans les services en ligne
+                            de la Commission de la construction du Québec. Il ne vaut pas
+                            transmission : le rapport mensuel doit être produit électroniquement,
+                            par les services en ligne ou par un logiciel de paie autorisé par la
+                            Commission. Un rapport non conforme, incomplet, erroné ou transmis en
+                            retard entraîne des intérêts et peut donner lieu à une poursuite pénale.
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      L'état du certificat est un champ stocké qui dépend de la date du jour :
+      sans ce passage quotidien, un certificat resterait affiché « valide » le
+      lendemain de son échéance, et la liste filtrée mentirait.
+
+      L'enjeu n'est pas administratif. Un salarié assigné à une tâche pour
+      laquelle il ne détient pas le certificat approprié expose L'EMPLOYEUR aux
+      amendes qu'il encourrait (convention institutionnel-commercial, article
+      4.05, paragraphe 1). L'alerte est posée soixante jours avant l'échéance,
+      une seule fois par salarié.
+    -->
+
+    <record id="cron_alerte_certificat_competence" model="ir.cron">
+        <field name="name">CCQ — Certificats de compétence à renouveler</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_alerte_certificat_competence()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

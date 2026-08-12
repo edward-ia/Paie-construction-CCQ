@@ -13,10 +13,15 @@ passé. Garder ces champs sur l'employé évite de dupliquer une version à chaq
 changement de local syndical, qui n'a rien d'un événement contractuel.
 """
 
+from datetime import timedelta
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 from .ccq_referentiel import PERIODE_SELECTION, STATUT_SELECTION
+
+DELAI_ALERTE_CERTIFICAT = 60
+RESUME_ALERTE_CERTIFICAT = "Certificat de compétence CCQ à renouveler"
 
 
 class HrEmployee(models.Model):
@@ -60,6 +65,69 @@ class HrEmployee(models.Model):
         string="Certificat de compétence",
         help="Numéro du certificat délivré par la CCQ.")
     l10n_ca_qc_ccq_carte_expiration = fields.Date(string="Échéance du certificat")
+    l10n_ca_qc_ccq_carte_etat = fields.Selection(
+        [('valide', "Valide"), ('bientot', "Échoit bientôt"), ('expire', "Échu")],
+        string="État du certificat", compute='_compute_carte_etat', store=True,
+        help="Un certificat échu transfère à l'employeur les amendes que le salarié "
+             "encourrait (convention institutionnel-commercial, article 4.05).",
+    )
+
+    @api.depends('l10n_ca_qc_ccq_carte_expiration')
+    def _compute_carte_etat(self):
+        aujourdhui = fields.Date.context_today(self)
+        limite = aujourdhui + timedelta(days=DELAI_ALERTE_CERTIFICAT)
+        for employee in self:
+            echeance = employee.l10n_ca_qc_ccq_carte_expiration
+            if not echeance:
+                employee.l10n_ca_qc_ccq_carte_etat = False
+            elif echeance < aujourdhui:
+                employee.l10n_ca_qc_ccq_carte_etat = 'expire'
+            elif echeance <= limite:
+                employee.l10n_ca_qc_ccq_carte_etat = 'bientot'
+            else:
+                employee.l10n_ca_qc_ccq_carte_etat = 'valide'
+
+    @api.model
+    def _cron_alerte_certificat_competence(self):
+        """Recalcule l'état des certificats et signale ceux qui approchent.
+
+        Le champ est stocké pour rester filtrable, mais il dépend de la date du
+        jour : sans ce passage quotidien, un certificat resterait « valide » à
+        l'écran le lendemain de son échéance.
+
+        L'activité n'est posée qu'une fois par salarié : on ne veut pas d'un
+        rappel neuf chaque matin pendant deux mois.
+        """
+        employees = self.search([('l10n_ca_qc_ccq_carte_expiration', '!=', False)])
+        employees._compute_carte_etat()
+        a_signaler = employees.filtered(
+            lambda e: e.l10n_ca_qc_ccq_carte_etat in ('bientot', 'expire'))
+        if not a_signaler:
+            return
+        activite = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
+        modele = self.env['ir.model']._get_id('hr.employee')
+        for employee in a_signaler:
+            deja = self.env['mail.activity'].search_count([
+                ('res_model_id', '=', modele),
+                ('res_id', '=', employee.id),
+                ('activity_type_id', '=', activite.id if activite else False),
+                ('summary', '=', RESUME_ALERTE_CERTIFICAT),
+            ])
+            if deja:
+                continue
+            employee.activity_schedule(
+                'mail.mail_activity_data_todo',
+                date_deadline=employee.l10n_ca_qc_ccq_carte_expiration,
+                summary=RESUME_ALERTE_CERTIFICAT,
+                note="Le certificat de compétence de %s %s le %s. Sans certificat "
+                     "valide, l'employeur répond des amendes encourues par le "
+                     "salarié." % (
+                         employee.name,
+                         "a échu" if employee.l10n_ca_qc_ccq_carte_etat == 'expire'
+                         else "échoit",
+                         employee.l10n_ca_qc_ccq_carte_expiration),
+                user_id=employee.parent_id.user_id.id or self.env.uid,
+            )
 
     @api.constrains('l10n_ca_qc_ccq_assujetti', 'l10n_ca_qc_ccq_metier_id',
                     'l10n_ca_qc_ccq_periode')

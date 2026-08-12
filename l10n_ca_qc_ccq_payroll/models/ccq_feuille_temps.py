@@ -6,7 +6,16 @@ quel titre. C'est pourquoi la ligne d'heures est le vrai centre du module. Si el
 ne porte pas ses dimensions dès la saisie, ni la ventilation des taux ni le
 rapport mensuel ne sont récupérables, et il faut tout refaire.
 
-LA SEMAINE EST IMPOSÉE par la CCQ : du dimanche 0 h 01 au samedi 0 h. La période
+LE REGISTRE EST UNE OBLIGATION DISTINCTE DE LA PAIE. La loi exige l'heure précise
+à laquelle le travail a commencé, a été interrompu, repris et achevé chaque jour
+(R-20 article 82 a) et `r. 11` article 8 paragraphe 3°), ainsi que la ventilation
+des heures par chantier ET par donneur d'ouvrage. Ces heures-là ne servent à
+aucun calcul : elles servent à répondre à une inspection. Un registre absent,
+altéré ou faux se punit de 15 000 à 150 000 $ pour une personne morale
+(R-20 article 122.4), et la prescription de douze mois ne court même pas.
+
+LA SEMAINE EST IMPOSÉE par la CCQ : du dimanche 0 h 01 au samedi 24 h
+(`r. 11` article 12 alinéa 4). La période
 mensuelle regroupe quatre ou cinq de ces semaines et se termine le dernier samedi
 du mois ; le rapport et le paiement sont dus au plus tard le 15 du mois suivant,
 sous peine d'intérêts et de poursuite pénale. La paie est donc hebdomadaire, et
@@ -37,7 +46,7 @@ class CcqFeuilleTemps(models.Model):
         'hr.employee', string="Employé", required=True, ondelete='restrict')
     date_debut = fields.Date(
         string="Semaine du (dimanche)", required=True,
-        help="La semaine CCQ va du dimanche 0 h 01 au samedi 0 h.")
+        help="La semaine CCQ va du dimanche 0 h 01 au samedi 24 h.")
     date_fin = fields.Date(
         string="au (samedi)", compute='_compute_date_fin', store=True)
     ligne_ids = fields.One2many(
@@ -145,6 +154,27 @@ class CcqFeuilleTempsLigne(models.Model):
         string="Chambre et pension",
         help="À cocher quand le salarié est logé plutôt qu'indemnisé au déplacement.")
 
+    heure_debut = fields.Float(
+        string="Début", digits=(4, 2),
+        help="Heure à laquelle le travail a commencé, en heures décimales : 7,5 = 7 h 30. "
+             "Exigée au registre par la loi R-20, article 82 a).")
+    heure_fin = fields.Float(
+        string="Fin", digits=(4, 2),
+        help="Heure à laquelle le travail s'est achevé. Une heure de fin antérieure à "
+             "l'heure de début se lit comme un quart terminé après minuit.")
+    interruption_ids = fields.One2many(
+        'ccq.feuille.temps.interruption', 'ligne_id', string="Interruptions",
+        help="Repas et arrêts de la journée. Le règlement exige l'heure d'interruption "
+             "ET de reprise, et une journée peut en compter plusieurs.")
+    heures_registre = fields.Float(
+        string="Heures au registre", compute='_compute_heures_registre',
+        store=True, digits=(8, 2),
+        help="Temps écoulé entre le début et la fin, moins les interruptions.")
+    ecart_registre = fields.Float(
+        string="Écart", compute='_compute_heures_registre', store=True, digits=(8, 2),
+        help="Heures du registre moins heures déclarées. Un écart n'empêche ni la paie "
+             "ni la déclaration : il signale une saisie à revoir.")
+
     # ------------------------------------------------------------------
     # Dimensions figées — calculées depuis l'employé et le chantier, stockées,
     # et modifiables au cas par cas. Voir la docstring du module.
@@ -187,6 +217,55 @@ class CcqFeuilleTempsLigne(models.Model):
         for ligne in self:
             ligne.total_heures = (
                 ligne.heures_regulieres + ligne.heures_supp_50 + ligne.heures_supp_100)
+
+    @api.depends('heure_debut', 'heure_fin', 'interruption_ids.duree', 'total_heures')
+    def _compute_heures_registre(self):
+        """Durée du quart, interruptions déduites.
+
+        Une heure de fin inférieure à l'heure de début désigne le lendemain : un
+        quart de 22 h à 6 h dure huit heures et reste attaché au jour où il a
+        commencé, comme le veut la déclaration par journée.
+        """
+        for ligne in self:
+            registre = 0.0
+            if ligne.heure_debut or ligne.heure_fin:
+                fin = ligne.heure_fin + 24.0 if ligne.heure_fin <= ligne.heure_debut \
+                    else ligne.heure_fin
+                registre = fin - ligne.heure_debut - sum(
+                    ligne.interruption_ids.mapped('duree'))
+            ligne.heures_registre = round(registre, 2)
+            ligne.ecart_registre = round(registre - ligne.total_heures, 2) if registre else 0.0
+
+    @api.constrains('heure_debut', 'heure_fin', 'interruption_ids')
+    def _check_registre(self):
+        for ligne in self:
+            for heure in (ligne.heure_debut, ligne.heure_fin):
+                if not 0.0 <= heure < 24.0:
+                    raise ValidationError(
+                        "Une heure du registre doit être comprise entre 0 et 24. "
+                        "Saisissez 7,5 pour 7 h 30."
+                    )
+            if ligne.heures_registre < 0:
+                raise ValidationError(
+                    "Les interruptions du %s durent plus longtemps que le quart de "
+                    "travail lui-même." % ligne.date
+                )
+
+    @api.constrains('assujetti', 'heure_debut', 'heure_fin', 'total_heures')
+    def _check_registre_renseigne(self):
+        """Une heure de chantier sans horaire est un registre incomplet.
+
+        On bloque à la saisie : reconstituer des heures de début et de fin un an
+        plus tard, devant un inspecteur, n'est pas possible.
+        """
+        for ligne in self:
+            if ligne.assujetti and ligne.total_heures and not (
+                    ligne.heure_debut or ligne.heure_fin):
+                raise ValidationError(
+                    "Le registre exige l'heure de début et de fin du travail. "
+                    "Renseignez-les sur la ligne du %s pour %s."
+                    % (ligne.date, ligne.employee_id.name or "ce salarié")
+                )
 
     @api.depends('feuille_id.employee_id', 'chantier_id')
     def _compute_dimensions(self):
@@ -234,6 +313,23 @@ class CcqFeuilleTempsLigne(models.Model):
             if min(ligne.heures_regulieres, ligne.heures_supp_50, ligne.heures_supp_100) < 0:
                 raise ValidationError("Les heures ne peuvent pas être négatives.")
 
+    @api.constrains('assujetti', 'chantier_id')
+    def _check_donneur_ouvrage(self):
+        """Le registre ventile les heures par chantier ET par donneur d'ouvrage.
+
+        Le donneur d'ouvrage est porté par le chantier, un chantier étant
+        « l'ensemble des travaux effectués par un employeur pour un même projet »
+        (`r. 11` article 8) : un projet a un seul donneur d'ouvrage, et ventiler
+        par chantier ventile donc par donneur d'ouvrage.
+        """
+        for ligne in self:
+            if ligne.assujetti and not ligne.chantier_id.partner_id:
+                raise ValidationError(
+                    "Le chantier « %s » n'a pas de donneur d'ouvrage. Le registre "
+                    "exige les heures ventilées par chantier et par donneur "
+                    "d'ouvrage." % ligne.chantier_id.name
+                )
+
     @api.constrains('assujetti', 'taux_horaire')
     def _check_taux_trouve(self):
         """Une ligne assujettie sans taux signale une grille manquante.
@@ -251,4 +347,54 @@ class CcqFeuilleTempsLigne(models.Model):
                        ligne.periode or "période non définie",
                        ligne.annexe_id.code or "?",
                        ligne.date)
+                )
+
+
+class CcqFeuilleTempsInterruption(models.Model):
+    """Un arrêt de travail dans la journée, avec son heure de reprise.
+
+    La loi énumère quatre moments à consigner — début, interruption, reprise et
+    fin — et le fait « chaque jour ». Deux champs fixes sur la ligne d'heures ne
+    couvriraient qu'un seul arrêt : une journée coupée par un repas et par une
+    panne d'équipement en compte deux, et le registre doit les porter tous les
+    deux.
+    """
+
+    _name = 'ccq.feuille.temps.interruption'
+    _description = "CCQ — Interruption de travail"
+    _order = 'ligne_id, heure_debut'
+
+    ligne_id = fields.Many2one(
+        'ccq.feuille.temps.ligne', string="Ligne d'heures", required=True,
+        ondelete='cascade')
+    motif = fields.Char(string="Motif", help="Repas, panne, intempéries…")
+    heure_debut = fields.Float(
+        string="Interruption", digits=(4, 2), required=True,
+        help="Heure à laquelle le travail a été interrompu, en heures décimales.")
+    heure_fin = fields.Float(
+        string="Reprise", digits=(4, 2), required=True,
+        help="Heure à laquelle le travail a repris.")
+    duree = fields.Float(
+        string="Durée", compute='_compute_duree', store=True, digits=(8, 2))
+
+    @api.depends('heure_debut', 'heure_fin')
+    def _compute_duree(self):
+        for interruption in self:
+            fin = interruption.heure_fin
+            if fin <= interruption.heure_debut:
+                fin += 24.0
+            interruption.duree = round(fin - interruption.heure_debut, 2)
+
+    @api.constrains('heure_debut', 'heure_fin')
+    def _check_heures(self):
+        for interruption in self:
+            for heure in (interruption.heure_debut, interruption.heure_fin):
+                if not 0.0 <= heure < 24.0:
+                    raise ValidationError(
+                        "Une heure d'interruption doit être comprise entre 0 et 24."
+                    )
+            if interruption.heure_debut == interruption.heure_fin:
+                raise ValidationError(
+                    "Une interruption qui reprend à l'heure où elle commence ne dure "
+                    "rien : supprimez-la ou corrigez l'heure de reprise."
                 )

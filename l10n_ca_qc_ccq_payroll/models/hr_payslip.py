@@ -1,6 +1,18 @@
 from odoo import models
 from odoo.exceptions import UserError
 
+from .ccq_referentiel import (
+    STATUTS_AVEC_FRAIS_PARTICIPATION,
+    STATUTS_SANS_ASSOCIATIONS_PATRONALES,
+    STATUTS_SANS_ASSURANCE,
+    STATUTS_SANS_CONGES,
+    STATUTS_SANS_CONTRIBUTION_SECTORIELLE,
+    STATUTS_SANS_FONDS_FORMATION,
+    STATUTS_SANS_FONDS_INDEMNISATION,
+    STATUTS_SANS_PRELEVEMENT,
+    STATUTS_SANS_RETRAITE,
+)
+
 
 class HrPayslip(models.Model):
     """Rémunération des heures de chantier.
@@ -64,12 +76,42 @@ class HrPayslip(models.Model):
         self.ensure_one()
         return self._ccq_lignes_temps().filtered('assujetti')
 
-    def _ccq_primes(self):
+    def _ccq_lignes_cotisables(self, statuts_exclus):
+        """Lignes assujetties dont le statut n'exempte pas de la cotisation.
+
+        Les codes du tableau B de PD5277 désignent des situations où l'heure est
+        déclarée mais où certaines cotisations ne sont pas dues : l'entrepreneur
+        autonome n'a pas d'avantages sociaux, le représentant désigné ne paie ni
+        prélèvement ni fonds, et ainsi de suite. Le filtre est posé LIGNE PAR
+        LIGNE, parce que le statut est une propriété de l'heure travaillée : un
+        même salarié peut cumuler des heures ordinaires et des heures déclarées
+        sous un code particulier dans la même semaine.
+
+        Le statut vide est celui du salarié ordinaire : il ne figure dans aucune
+        liste d'exclusion et cotise à tout.
+        """
+        self.ensure_one()
+        return self._ccq_lignes_assujetties().filtered(
+            lambda ligne: ligne.statut not in statuts_exclus)
+
+    def _ccq_lignes_frais_participation(self):
+        """Heures qui déclenchent les frais de participation aux régimes.
+
+        Ces heures-là ne sont PAS assujetties à la loi R-20 : c'est tout le
+        propos du statut A, qui maintient volontairement les régimes d'avantages
+        sociaux sur des heures qui en sortent. Le filtre part donc de toutes les
+        lignes de la période, pas des seules lignes assujetties.
+        """
+        self.ensure_one()
+        return self._ccq_lignes_temps().filtered(
+            lambda ligne: ligne.statut in STATUTS_AVEC_FRAIS_PARTICIPATION)
+
+    def _ccq_primes(self, lignes=None):
         self.ensure_one()
         majorations = self._ccq_majorations()
         Prime = self.env['ccq.prime']
         total = 0.0
-        for ligne in self._ccq_lignes_assujetties():
+        for ligne in self._ccq_lignes_assujetties() if lignes is None else lignes:
             for prime in ligne.prime_ids:
                 version = Prime._version_applicable(prime, ligne.date)
                 if not version:
@@ -87,17 +129,24 @@ class HrPayslip(models.Model):
                 total += unitaire * heures
         return round(total, 2)
 
-    def _ccq_salaire_cotisable(self):
+    def _ccq_salaire_cotisable(self, lignes=None):
+        """Salaire de convention servant d'assiette aux cotisations.
+
+        L'ensemble de lignes est paramétrable pour que chaque cotisation puisse
+        écarter les statuts qui en sont exemptés sans recopier ce calcul.
+        """
         self.ensure_one()
+        if lignes is None:
+            lignes = self._ccq_lignes_assujetties()
         majorations = self._ccq_majorations()
         total = sum(
             ligne.taux_horaire * (
                 ligne.heures_regulieres
                 + ligne.heures_supp_50 * majorations['majoration_50']
                 + ligne.heures_supp_100 * majorations['majoration_100'])
-            for ligne in self._ccq_lignes_assujetties()
+            for ligne in lignes
         )
-        return round(total + self._ccq_primes(), 2)
+        return round(total + self._ccq_primes(lignes), 2)
 
     # ------------------------------------------------------------------
     # Règles de paie
@@ -149,8 +198,15 @@ class HrPayslip(models.Model):
         return p['conges_annuels'] + p['jours_feries'] + p['maladie']
 
     def _ccq_conges(self):
+        """Indemnité de 13 %, due sur toutes les heures sauf celles du statut C.
+
+        L'entrepreneur autonome facture ses services : il n'a ni congés payés ni
+        avantages sociaux (PD5277, tableau B).
+        """
         self.ensure_one()
-        return round(self._ccq_salaire_cotisable() * self._ccq_taux_conges(), 2)
+        assiette = self._ccq_salaire_cotisable(
+            self._ccq_lignes_cotisables(STATUTS_SANS_CONGES))
+        return round(assiette * self._ccq_taux_conges(), 2)
 
     # ------------------------------------------------------------------
     # Avantages sociaux
@@ -219,11 +275,13 @@ class HrPayslip(models.Model):
         """
         self.ensure_one()
         facteur_conges = 1.0 + self._ccq_taux_conges()
+        statuts_exclus = (STATUTS_SANS_RETRAITE if caisse == 'retraite'
+                          else STATUTS_SANS_ASSURANCE)
         total = sum(
             ligne.total_heures
             * self._ccq_cotisation_horaire(
                 ligne, caisse, payeur, facteur_conges, obligatoire)
-            for ligne in self._ccq_lignes_assujetties()
+            for ligne in self._ccq_lignes_cotisables(statuts_exclus)
         )
         return round(total, 2)
 
@@ -280,7 +338,7 @@ class HrPayslip(models.Model):
     # Prélèvement et fonds sectoriels
     # ------------------------------------------------------------------
 
-    def _ccq_heures_travaillees(self):
+    def _ccq_heures_travaillees(self, statuts_exclus=()):
         """Heures travaillées assujetties de la période, sans majoration.
 
         Les fonds se cotisent « pour chaque heure travaillée » : une heure
@@ -289,7 +347,7 @@ class HrPayslip(models.Model):
         du contrat, qui ignore où et pour qui le salarié a travaillé.
         """
         self.ensure_one()
-        return sum(self._ccq_lignes_assujetties().mapped('total_heures'))
+        return sum(self._ccq_lignes_cotisables(statuts_exclus).mapped('total_heures'))
 
     def _ccq_prelevement(self, part):
         """Prélèvement de la CCQ — R-20, r. 9, article 1.
@@ -313,7 +371,11 @@ class HrPayslip(models.Model):
         """
         self.ensure_one()
         taux = self._rule_parameter('l10n_ca_qc_ccq_prelevement')[part]
-        assiette = self._ccq_salaire_cotisable() + self._ccq_conges()
+        lignes = self._ccq_lignes_cotisables(STATUTS_SANS_PRELEVEMENT)
+        assiette = self._ccq_salaire_cotisable(lignes) + round(
+            self._ccq_salaire_cotisable(
+                lignes.filtered(lambda l: l.statut not in STATUTS_SANS_CONGES))
+            * self._ccq_taux_conges(), 2)
         return round(assiette * taux, 2)
 
     def _ccq_prelevement_salarie(self):
@@ -337,7 +399,8 @@ class HrPayslip(models.Model):
         """
         self.ensure_one()
         taux = self._rule_parameter('l10n_ca_qc_ccq_fonds_formation')
-        return round(self._ccq_heures_travaillees() * taux, 2)
+        heures = self._ccq_heures_travaillees(STATUTS_SANS_FONDS_FORMATION)
+        return round(heures * taux, 2)
 
     def _ccq_fonds_indemnisation(self):
         """Fonds d'indemnisation — R-20, r. 7.01, article 4.
@@ -353,7 +416,8 @@ class HrPayslip(models.Model):
         if self.employee_id.l10n_ca_qc_ccq_exclu_fonds_indemnisation:
             return 0.0
         taux = self._rule_parameter('l10n_ca_qc_ccq_fonds_indemnisation')
-        return round(self._ccq_heures_travaillees() * taux, 2)
+        heures = self._ccq_heures_travaillees(STATUTS_SANS_FONDS_INDEMNISATION)
+        return round(heures * taux, 2)
 
     def _ccq_contribution_sectorielle(self, payeur):
         """Contribution sectorielle — convention IC 2025-2029, article 7.09.
@@ -378,7 +442,7 @@ class HrPayslip(models.Model):
         self.ensure_one()
         bareme = self._rule_parameter('l10n_ca_qc_ccq_contribution_sectorielle')
         total = 0.0
-        for ligne in self._ccq_lignes_assujetties():
+        for ligne in self._ccq_lignes_cotisables(STATUTS_SANS_CONTRIBUTION_SECTORIELLE):
             regle = bareme.get(ligne.secteur_id.code)
             if not regle:
                 raise UserError(
@@ -410,7 +474,7 @@ class HrPayslip(models.Model):
         self.ensure_one()
         Avantage = self.env['ccq.avantage.imposable']
         total = 0.0
-        for ligne in self._ccq_lignes_assujetties():
+        for ligne in self._ccq_lignes_cotisables(STATUTS_SANS_ASSURANCE):
             montant = Avantage._montant_applicable(
                 ligne.metier_id, ligne.secteur_id, ligne.annexe_id, ligne.date)
             if montant:
@@ -454,9 +518,30 @@ class HrPayslip(models.Model):
         total = sum(
             ligne.total_heures * (
                 p['aecq_horaire'] + sectorielle.get(ligne.secteur_id.code, 0.0))
-            for ligne in self._ccq_lignes_assujetties()
+            for ligne in self._ccq_lignes_cotisables(STATUTS_SANS_ASSOCIATIONS_PATRONALES)
         )
         return round(total, 2)
+
+    def _ccq_frais_participation(self):
+        """Frais de participation aux régimes — R-20, article 126.0.2.
+
+        « Des frais de 0,075 $ par heure de travail sont payables à la Commission
+        par toute personne qui lui transmet des contributions et cotisations aux
+        régimes complémentaires d'avantages sociaux à l'égard d'un employé qui
+        n'est pas un salarié assujetti à la présente loi », et le même montant
+        est payable par l'employé, « acquitté au moyen d'une retenue sur le
+        salaire ». C'est le prix du maintien volontaire des régimes sur des
+        heures qui sortent du champ de la loi : le statut A du tableau B de
+        PD5277, étendu par ce guide au représentant désigné et aux trois codes
+        d'association syndicale.
+
+        Les deux parts sont identiques, d'où une seule méthode pour les deux
+        règles de paie.
+        """
+        self.ensure_one()
+        taux = self._rule_parameter('l10n_ca_qc_ccq_frais_participation')
+        heures = sum(self._ccq_lignes_frais_participation().mapped('total_heures'))
+        return round(heures * taux, 2)
 
     def _ccq_contribution_sectorielle_salarie(self):
         self.ensure_one()

@@ -37,6 +37,16 @@ STATUT_SELECTION = [
     ('J', "J — Association syndicale (retraite seulement)"),
 ]
 
+STATUTS_SANS_CONTRIBUTION_SECTORIELLE = ('A', 'C', 'E', 'H', 'I', 'J')
+STATUTS_SANS_FONDS_INDEMNISATION = ('A', 'C', 'E', 'H', 'I', 'J')
+STATUTS_SANS_FONDS_FORMATION = ('A', 'C', 'E', 'H', 'I', 'J')
+STATUTS_SANS_ASSOCIATIONS_PATRONALES = ('A', 'E', 'H', 'I', 'J')
+STATUTS_SANS_PRELEVEMENT = ('A', 'E', 'H', 'I', 'J')
+STATUTS_SANS_CONGES = ('C',)
+STATUTS_SANS_ASSURANCE = ('C', 'J')
+STATUTS_SANS_RETRAITE = ('C', 'I')
+STATUTS_AVEC_FRAIS_PARTICIPATION = ('A', 'E', 'H', 'I', 'J')
+
 
 class CcqSecteur(models.Model):
     """Un des quatre secteurs de la loi R-20.

@@ -41,6 +41,7 @@
                             <field name="l10n_ca_qc_ccq_periode"/>
                             <field name="l10n_ca_qc_ccq_carte_competence"/>
                             <field name="l10n_ca_qc_ccq_carte_expiration"/>
+                            <field name="l10n_ca_qc_ccq_carte_etat"/>
                         </group>
                         <group string="Syndicat"
                                invisible="not l10n_ca_qc_ccq_assujetti">
@@ -185,7 +186,45 @@
                                     <field name="annexe_id" optional="hide"/>
                                     <field name="region_id" optional="hide"/>
                                     <field name="local_id" optional="hide"/>
+                                    <field name="heure_debut" widget="float_time"/>
+                                    <field name="heure_fin" widget="float_time"/>
+                                    <field name="heures_registre" optional="show"/>
+                                    <field name="ecart_registre" optional="show"
+                                           decoration-danger="ecart_registre != 0"/>
                                 </list>
+                                <form string="Ligne d'heures">
+                                    <group>
+                                        <group string="Travail">
+                                            <field name="date"/>
+                                            <field name="chantier_id"/>
+                                            <field name="heures_regulieres"/>
+                                            <field name="heures_supp_50"/>
+                                            <field name="heures_supp_100"/>
+                                            <field name="total_heures"/>
+                                            <field name="prime_ids" widget="many2many_tags"/>
+                                        </group>
+                                        <group string="Registre légal">
+                                            <field name="heure_debut" widget="float_time"/>
+                                            <field name="heure_fin" widget="float_time"/>
+                                            <field name="heures_registre"/>
+                                            <field name="ecart_registre"/>
+                                        </group>
+                                    </group>
+                                    <group string="Interruptions">
+                                        <field name="interruption_ids" nolabel="1">
+                                            <list editable="bottom">
+                                                <field name="heure_debut" widget="float_time"/>
+                                                <field name="heure_fin" widget="float_time"/>
+                                                <field name="duree" sum="Total"/>
+                                                <field name="motif"/>
+                                            </list>
+                                        </field>
+                                    </group>
+                                    <group string="Déplacement">
+                                        <field name="distance_km"/>
+                                        <field name="chambre_pension"/>
+                                    </group>
+                                </form>
                             </field>
                         </page>
                         <page string="Notes" name="notes">
@@ -200,6 +239,142 @@
     <record id="action_ccq_feuille_temps" model="ir.actions.act_window">
         <field name="name">Feuilles de temps</field>
         <field name="res_model">ccq.feuille.temps</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ================================================================
+         RAPPORT MENSUEL
+         ================================================================ -->
+
+    <record id="view_ccq_rapport_mensuel_list" model="ir.ui.view">
+        <field name="name">ccq.rapport.mensuel.list</field>
+        <field name="model">ccq.rapport.mensuel</field>
+        <field name="arch" type="xml">
+            <list string="Rapports mensuels" decoration-warning="inactif">
+                <field name="name"/>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="date_echeance"/>
+                <field name="nb_salaries"/>
+                <field name="total_heures" sum="Heures"/>
+                <field name="total_a_remettre" sum="À remettre"/>
+                <field name="inactif" optional="show"/>
+                <field name="state"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ccq_rapport_mensuel_form" model="ir.ui.view">
+        <field name="name">ccq.rapport.mensuel.form</field>
+        <field name="model">ccq.rapport.mensuel</field>
+        <field name="arch" type="xml">
+            <form string="Rapport mensuel">
+                <header>
+                    <button name="action_calculer" type="object" string="Calculer"
+                            class="btn-primary" invisible="state == 'transmis'"/>
+                    <button name="action_transmettre" type="object"
+                            string="Marquer transmis" invisible="state != 'calcule'"/>
+                    <button name="action_remettre_brouillon" type="object"
+                            string="Remettre en brouillon" invisible="state == 'brouillon'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not inactif">
+                        Aucune heure déclarable dans cette période. Le rapport doit être
+                        transmis quand même : un mois sans travaux se déclare, au plus tard
+                        le 15 du mois suivant.
+                    </div>
+                    <group>
+                        <group string="Période mensuelle">
+                            <field name="annee" readonly="state != 'brouillon'"/>
+                            <field name="mois" readonly="state != 'brouillon'"/>
+                            <field name="date_debut"/>
+                            <field name="date_fin"/>
+                            <field name="date_echeance"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Déclaré">
+                            <field name="nb_salaries"/>
+                            <field name="total_heures"/>
+                            <field name="total_salaire"/>
+                            <field name="inactif"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Déclarations" name="declarations">
+                            <field name="ligne_ids" readonly="1">
+                                <list string="Déclarations">
+                                    <field name="employee_id"/>
+                                    <field name="identifiant"/>
+                                    <field name="metier_id"/>
+                                    <field name="periode"/>
+                                    <field name="statut" optional="show"/>
+                                    <field name="secteur_id"/>
+                                    <field name="annexe_id"/>
+                                    <field name="region_id"/>
+                                    <field name="heures_regulieres" sum="Régulières"/>
+                                    <field name="heures_supp_50" sum="+50 %"/>
+                                    <field name="heures_supp_100" sum="+100 %"/>
+                                    <field name="total_heures" sum="Total"/>
+                                    <field name="semaines_travaillees"/>
+                                    <field name="salaire" sum="Salaire"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sommes à remettre" name="remise">
+                            <group>
+                                <group string="Retenues et cotisations">
+                                    <field name="montant_prelevement"/>
+                                    <field name="montant_conges"/>
+                                    <field name="montant_assurance"/>
+                                    <field name="montant_taxe_assurance"/>
+                                    <field name="montant_retraite"/>
+                                    <field name="montant_contribution_sectorielle"/>
+                                    <field name="montant_formation"/>
+                                    <field name="montant_indemnisation"/>
+                                    <field name="montant_frais_participation"/>
+                                    <field name="montant_associations_patronales"/>
+                                    <field name="montant_aecq_annuelle"
+                                           invisible="not montant_aecq_annuelle"/>
+                                </group>
+                                <group string="Minimums de la période">
+                                    <field name="ajustement_prelevement"/>
+                                    <field name="ajustement_aecq"/>
+                                </group>
+                            </group>
+                            <group class="oe_subtotal_footer">
+                                <field name="total_a_remettre"/>
+                            </group>
+                        </page>
+                        <page string="Bulletins" name="bulletins">
+                            <field name="payslip_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="employee_id"/>
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ccq_rapport_mensuel" model="ir.actions.act_window">
+        <field name="name">Rapports mensuels</field>
+        <field name="res_model">ccq.rapport.mensuel</field>
         <field name="view_mode">list,form</field>
     </record>
 
@@ -488,6 +663,8 @@
               parent="menu_ccq_operations" action="action_ccq_feuille_temps" sequence="10"/>
     <menuitem id="menu_ccq_chantier" name="Chantiers"
               parent="menu_ccq_operations" action="action_ccq_chantier" sequence="20"/>
+    <menuitem id="menu_ccq_rapport_mensuel" name="Rapports mensuels"
+              parent="menu_ccq_operations" action="action_ccq_rapport_mensuel" sequence="30"/>
 
     <menuitem id="menu_ccq_config" name="Configuration"
               parent="menu_ccq_root" groups="hr.group_hr_manager" sequence="90"/>

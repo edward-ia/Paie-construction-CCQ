@@ -94,6 +94,19 @@
         <field name="parameter_value">{'aecq_horaire': 0.03, 'sectorielle_horaire': {'IC': 0.03, 'IND': 0.03, 'GCV': 0.045}, 'min_mensuel': 5.0, 'aecq_annuelle': 240.0, 'mois_cotisation_annuelle': 10}</field>
     </record>
 
+    <!-- Frais de participation aux régimes : 0,075 $ par heure de travail, à la
+         charge de l'employeur, et le MÊME montant retenu au salarié.
+         Source : R-20 article 126.0.2, au texte. Ils ne sont dus que sur les heures
+         NON assujetties pour lesquelles l'employeur maintient volontairement les
+         régimes d'avantages sociaux — les codes de statut A, E, H, I et J.
+         ⚠️ L'article cesse d'avoir effet à l'entrée en vigueur d'un règlement du
+         gouvernement pris en vertu du paragraphe 8.1° de l'article 123 : surveiller. -->
+    <record id="val_ccq_frais_participation_2025" model="hr.rule.parameter.value">
+        <field name="rule_parameter_id" ref="rule_param_ccq_frais_participation"/>
+        <field name="date_from">2025-04-27</field>
+        <field name="parameter_value">0.075</field>
+    </record>
+
     <!-- Taxe de vente sur l'assurance : 9 %, sur la seule part versée à la caisse
          de prévoyance collective, part salariale comme part patronale (clauses
          communes, article 27.03 A) 1) et A) 2) : « selon les pratiques usuelles

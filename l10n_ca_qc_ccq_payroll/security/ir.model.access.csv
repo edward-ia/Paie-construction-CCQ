@@ -31,3 +31,9 @@ access_ccq_feuille_temps_ligne_user,ccq.feuille.temps.ligne user,model_ccq_feuil
 access_ccq_feuille_temps_ligne_manager,ccq.feuille.temps.ligne manager,model_ccq_feuille_temps_ligne,hr.group_hr_manager,1,1,1,1
 access_ccq_avantage_imposable_user,ccq.avantage.imposable user,model_ccq_avantage_imposable,hr.group_hr_user,1,0,0,0
 access_ccq_avantage_imposable_manager,ccq.avantage.imposable manager,model_ccq_avantage_imposable,hr.group_hr_manager,1,1,1,1
+access_ccq_feuille_temps_interruption_user,ccq.feuille.temps.interruption user,model_ccq_feuille_temps_interruption,hr.group_hr_user,1,1,1,1
+access_ccq_feuille_temps_interruption_manager,ccq.feuille.temps.interruption manager,model_ccq_feuille_temps_interruption,hr.group_hr_manager,1,1,1,1
+access_ccq_rapport_mensuel_user,ccq.rapport.mensuel user,model_ccq_rapport_mensuel,hr.group_hr_user,1,0,0,0
+access_ccq_rapport_mensuel_manager,ccq.rapport.mensuel manager,model_ccq_rapport_mensuel,hr.group_hr_manager,1,1,1,1
+access_ccq_rapport_mensuel_ligne_user,ccq.rapport.mensuel.ligne user,model_ccq_rapport_mensuel_ligne,hr.group_hr_user,1,0,0,0
+access_ccq_rapport_mensuel_ligne_manager,ccq.rapport.mensuel.ligne manager,model_ccq_rapport_mensuel_ligne,hr.group_hr_manager,1,1,1,1
