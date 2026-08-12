@@ -91,7 +91,7 @@
     <record id="val_ccq_associations_patronales_2025" model="hr.rule.parameter.value">
         <field name="rule_parameter_id" ref="rule_param_ccq_associations_patronales"/>
         <field name="date_from">2025-04-27</field>
-        <field name="parameter_value">{'aecq_horaire': 0.03, 'acq_horaire_ic': 0.03, 'min_mensuel': 5.0, 'aecq_annuelle': 240.0, 'mois_cotisation_annuelle': 10}</field>
+        <field name="parameter_value">{'aecq_horaire': 0.03, 'sectorielle_horaire': {'IC': 0.03, 'IND': 0.03, 'GCV': 0.045}, 'min_mensuel': 5.0, 'aecq_annuelle': 240.0, 'mois_cotisation_annuelle': 10}</field>
     </record>
 
     <!-- Taxe de vente sur l'assurance : 9 %, sur la seule part versée à la caisse

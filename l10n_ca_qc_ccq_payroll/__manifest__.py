@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.12.0',
+    'version': '19.0.0.15.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",
@@ -38,16 +38,23 @@ CONTENU :
     caisse de retraite, celle-ci distinguant l'Apprenti des autres salariés, avec
     les règles particulières de métier qui s'ajoutent au montant des clauses
     communes au lieu de le remplacer ;
-  - prélèvement de la CCQ, parts salariale et patronale, sur la rémunération
-    versée ;
+  - prélèvement de la CCQ, parts salariale et patronale, sur le salaire cotisable
+    augmenté de l'indemnité de 13 % ;
   - cotisations patronales au fonds de formation et au fonds d'indemnisation,
     calculées sur les heures des feuilles de temps, chacune avec sa propre
     assiette — seul le fonds d'indemnisation exclut les propriétaires,
-    actionnaires principaux, répondants de licence et représentants désignés.
+    actionnaires principaux, répondants de licence et représentants désignés ;
+  - contribution sectorielle, à la charge du salarié dans trois secteurs et de
+    l'employeur en résidentiel ;
+  - cotisations aux associations patronales : part commune à l'AECQ et part
+    sectorielle à l'ACQ ou à l'ACRGTQ selon le secteur ;
+  - avantage imposable des régimes d'assurance, ajouté au revenu imposable du
+    Québec et au salaire admissible au RRQ, mais ni au fédéral, ni au RQAP, ni
+    à l'assurance-emploi.
 
-NON AUTOMATISÉ : la cotisation syndicale, les cotisations aux associations
-patronales, les frais de déplacement, l'heure de début et de fin exigée au
-registre, le donneur d'ouvrage, le rapport mensuel et les remises.
+NON AUTOMATISÉ : la cotisation syndicale, les frais de déplacement, les
+exceptions liées aux codes de statut du tableau B, l'heure de début et de fin
+exigée au registre, le donneur d'ouvrage, le rapport mensuel et les remises.
 
 Sources officielles :
   - CCQ, « Guide pour remplir le rapport mensuel » (PD5277)
@@ -80,6 +87,7 @@ reste, pour pouvoir rejouer l'historique.
         'data/ccq_region_data.xml',
         'data/ccq_taux_data.xml',
         'data/ccq_avantage_social_data.xml',
+        'data/ccq_avantage_imposable_data.xml',
         'data/ccq_salary_rule_data.xml',
         'views/ccq_views.xml',
         'views/ccq_search_views.xml',

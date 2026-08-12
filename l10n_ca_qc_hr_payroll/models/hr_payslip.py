@@ -103,7 +103,8 @@ class HrPayslip(models.Model):
         p = self._rule_parameter('l10n_ca_qc_rrq')
         periods = self._l10n_ca_qc_periods()
         # L'exemption de base annuelle est répartie sur les périodes de paie.
-        cotisable = max(0.0, gross - p['exemption'] / periods)
+        cotisable = max(0.0, gross + self._l10n_ca_qc_avantage_imposable()
+                        - p['exemption'] / periods)
         return round(self._l10n_ca_qc_capped(cotisable * p['taux'], 'RRQ', p['max']), 2)
 
     def _l10n_ca_qc_rrq2(self, gross):
@@ -239,6 +240,32 @@ class HrPayslip(models.Model):
         self.ensure_one()
         return 0.0
 
+    def _l10n_ca_qc_avantage_imposable(self):
+        """Avantage imposable de la période, assujetti au Québec seulement.
+
+        Un avantage imposable n'est pas versé au salarié : il s'ajoute pourtant
+        au revenu sur lequel se calculent l'impôt du Québec et le RRQ. L'impôt
+        fédéral, le RQAP et l'assurance-emploi n'en tiennent pas compte, chaque
+        régime ayant sa propre assiette.
+
+        Le RQAP en est écarté par une règle générale : « seule la rémunération
+        versée en argent est considérée comme un salaire versé, car un avantage
+        en nature ne constitue pas un salaire admissible au RQAP » (TP-1015.G,
+        partie 1.4). Une ALLOCATION versée en argent, elle, serait du salaire
+        pour toutes les assiettes et n'aurait donc rien à faire ici : elle
+        s'ajoute au brut.
+
+        Le RRQ2 est laissé de côté volontairement : son calcul s'appuie sur le
+        cumul annuel du brut, où l'avantage ne figure pas, et il ne se déclenche
+        qu'au-delà du maximum des gains admissibles.
+
+        Aucun avantage de ce type n'existe dans la paie de base : le point
+        d'entrée rend zéro et laisse les couches qui en portent un le
+        renseigner.
+        """
+        self.ensure_one()
+        return 0.0
+
     def _l10n_ca_qc_bracket(self, brackets, taxable):
         """Retourne (taux, constante K) du palier correspondant au revenu annuel.
 
@@ -273,7 +300,7 @@ class HrPayslip(models.Model):
         rrq = self._l10n_ca_qc_rrq(gross)
         rrq2 = self._l10n_ca_qc_rrq2(gross)
 
-        annual = gross * periods
+        annual = (gross + self._l10n_ca_qc_avantage_imposable()) * periods
         # Déduction pour travailleur : un pourcentage du revenu, plafonné.
         deduction = min(annual * worker['taux'], worker['max'])
         # Part déductible du RRQ : la première cotisation supplémentaire (1 %) et

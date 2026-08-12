@@ -294,11 +294,17 @@ class HrPayslip(models.Model):
     def _ccq_prelevement(self, part):
         """Prélèvement de la CCQ — R-20, r. 9, article 1.
 
-        L'assiette est la RÉMUNÉRATION VERSÉE, donc le salaire cotisable SANS
-        l'indemnité de 13 % : le règlement dit « rémunération » là où la loi
-        distingue, à son article 1 q), la « rémunération en monnaie courante » des
-        « indemnités ». L'y inclure serait au surplus circulaire, le 13 % étant
-        calculé sur ce même salaire cotisable.
+        L'assiette est le salaire cotisable AUGMENTÉ de l'indemnité de 13 % :
+        « 0,75 % du salaire cotisable additionné du montant de congés et jours
+        fériés payés » (guide PD5277, page 5), la Commission percevant au total
+        1,5 % à parts égales du salarié et de l'employeur.
+
+        Le règlement, lui, parle de « rémunération versée » (R-20, r. 9,
+        article 1), là où la loi distingue à son article 1 q) la « rémunération
+        en monnaie courante » des « indemnités » — lecture qui exclurait le
+        13 %. C'est la méthode de perception de la Commission qui est retenue :
+        une remise inférieure à ce qu'elle réclame est recouvrée majorée de
+        20 % (R-20, article 81, paragraphe c.2).
 
         Le minimum de 10 $ par période mensuelle du deuxième alinéa n'apparaît pas
         ici : il ne vise que l'employeur et l'entrepreneur autonome, jamais la
@@ -307,7 +313,8 @@ class HrPayslip(models.Model):
         """
         self.ensure_one()
         taux = self._rule_parameter('l10n_ca_qc_ccq_prelevement')[part]
-        return round(self._ccq_salaire_cotisable() * taux, 2)
+        assiette = self._ccq_salaire_cotisable() + self._ccq_conges()
+        return round(assiette * taux, 2)
 
     def _ccq_prelevement_salarie(self):
         self.ensure_one()
@@ -381,6 +388,74 @@ class HrPayslip(models.Model):
                 )
             if regle['payeur'] == payeur:
                 total += ligne.total_heures * regle['taux']
+        return round(total, 2)
+
+    def _ccq_avantage_imposable(self):
+        """Avantage imposable des régimes d'assurance sur la période.
+
+        Le montant se lit LIGNE PAR LIGNE, comme le taux de convention : il
+        dépend du métier, du secteur et du groupe d'annexes que porte la ligne
+        d'heures, et une même semaine peut mêler deux chantiers d'annexes
+        différentes — 3,303 $ l'heure en annexe C3, 3,333 $ en C6.
+
+        Les heures supplémentaires comptent une pour une : l'avantage rémunère
+        une heure de couverture, que la majoration ne dédouble pas.
+
+        Une combinaison sans montant publié vaut zéro. Contrairement à une
+        cotisation, l'absence n'est pas ici une erreur de configuration : il
+        n'existe d'avantage imposable que là où un régime d'assurance couvre le
+        métier, et les paies antérieures au premier millésime chargé n'en
+        portaient pas.
+        """
+        self.ensure_one()
+        Avantage = self.env['ccq.avantage.imposable']
+        total = 0.0
+        for ligne in self._ccq_lignes_assujetties():
+            montant = Avantage._montant_applicable(
+                ligne.metier_id, ligne.secteur_id, ligne.annexe_id, ligne.date)
+            if montant:
+                total += ligne.total_heures * montant.montant_horaire
+        return round(total, 2)
+
+    def _l10n_ca_qc_avantage_imposable(self):
+        """Seules les heures assujetties à la loi R-20 en produisent un.
+
+        Le personnel de bureau et les heures hors champ relèvent de la paie
+        ordinaire, qui n'en porte aucun.
+        """
+        self.ensure_one()
+        if not self.employee_id.l10n_ca_qc_ccq_assujetti:
+            return super()._l10n_ca_qc_avantage_imposable()
+        return self._ccq_avantage_imposable()
+
+    def _ccq_associations_patronales(self):
+        """Cotisations aux associations patronales — guide PD5277, page 5.
+
+        L'adhésion à l'association d'employeurs est obligatoire (R-20, article
+        40) et la cotisation se transmet avec le rapport mensuel. Elle comporte
+        une part commune à tous les secteurs, versée à l'AECQ, et une part
+        propre au secteur : l'ACQ en institutionnel-commercial et en industriel,
+        l'ACRGTQ en génie civil. En résidentiel, la part sectorielle passe par
+        la contribution sectorielle, qui verse à l'APCHQ.
+
+        Aucun texte de loi ne fixe ces montants : l'article 40 les renvoie à
+        « la base choisie par l'association ». Ils sont donc publiés, non
+        réglementés, et se corrigent par un nouveau millésime de paramètre.
+
+        Trois obligations de la période mensuelle n'apparaissent pas ici, un
+        bulletin hebdomadaire ne pouvant pas les trancher : le minimum de 5 $
+        par mois de l'AECQ, dû même sans activité déclarée, sa cotisation
+        annuelle de 240 $ payable avec le rapport d'octobre, et les taxes, que
+        la Commission perçoit à titre de mandataire.
+        """
+        self.ensure_one()
+        p = self._rule_parameter('l10n_ca_qc_ccq_associations_patronales')
+        sectorielle = p['sectorielle_horaire']
+        total = sum(
+            ligne.total_heures * (
+                p['aecq_horaire'] + sectorielle.get(ligne.secteur_id.code, 0.0))
+            for ligne in self._ccq_lignes_assujetties()
+        )
         return round(total, 2)
 
     def _ccq_contribution_sectorielle_salarie(self):

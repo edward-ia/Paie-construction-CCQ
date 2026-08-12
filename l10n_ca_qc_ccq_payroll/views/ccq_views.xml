@@ -434,6 +434,26 @@
         <field name="view_mode">list</field>
     </record>
 
+    <record id="view_ccq_avantage_imposable_list" model="ir.ui.view">
+        <field name="name">ccq.avantage.imposable.list</field>
+        <field name="model">ccq.avantage.imposable</field>
+        <field name="arch" type="xml">
+            <list string="Avantages imposables" editable="bottom">
+                <field name="date_debut"/>
+                <field name="metier_id"/>
+                <field name="secteur_id"/>
+                <field name="annexe_id"/>
+                <field name="montant_horaire"/>
+                <field name="note" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ccq_avantage_imposable" model="ir.actions.act_window">
+        <field name="name">Avantages imposables</field>
+        <field name="res_model">ccq.avantage.imposable</field>
+        <field name="view_mode">list</field>
+    </record>
+
     <record id="view_ccq_bareme_deplacement_list" model="ir.ui.view">
         <field name="name">ccq.bareme.deplacement.list</field>
         <field name="model">ccq.bareme.deplacement</field>
@@ -491,6 +511,8 @@
               parent="menu_ccq_config" action="action_ccq_taux_qualification" sequence="90"/>
     <menuitem id="menu_ccq_avantage_social" name="Avantages sociaux"
               parent="menu_ccq_config" action="action_ccq_avantage_social" sequence="95"/>
+    <menuitem id="menu_ccq_avantage_imposable" name="Avantages imposables"
+              parent="menu_ccq_config" action="action_ccq_avantage_imposable" sequence="96"/>
     <menuitem id="menu_ccq_bareme_deplacement" name="Barèmes de déplacement"
               parent="menu_ccq_config" action="action_ccq_bareme_deplacement" sequence="100"/>
 

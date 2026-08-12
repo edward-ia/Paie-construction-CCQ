@@ -29,3 +29,5 @@ access_ccq_feuille_temps_user,ccq.feuille.temps user,model_ccq_feuille_temps,hr.
 access_ccq_feuille_temps_manager,ccq.feuille.temps manager,model_ccq_feuille_temps,hr.group_hr_manager,1,1,1,1
 access_ccq_feuille_temps_ligne_user,ccq.feuille.temps.ligne user,model_ccq_feuille_temps_ligne,hr.group_hr_user,1,1,1,1
 access_ccq_feuille_temps_ligne_manager,ccq.feuille.temps.ligne manager,model_ccq_feuille_temps_ligne,hr.group_hr_manager,1,1,1,1
+access_ccq_avantage_imposable_user,ccq.avantage.imposable user,model_ccq_avantage_imposable,hr.group_hr_user,1,0,0,0
+access_ccq_avantage_imposable_manager,ccq.avantage.imposable manager,model_ccq_avantage_imposable,hr.group_hr_manager,1,1,1,1
