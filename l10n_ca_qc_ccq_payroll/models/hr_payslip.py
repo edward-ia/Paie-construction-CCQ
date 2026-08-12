@@ -396,7 +396,7 @@ class HrPayslip(models.Model):
         Le montant se lit LIGNE PAR LIGNE, comme le taux de convention : il
         dépend du métier, du secteur et du groupe d'annexes que porte la ligne
         d'heures, et une même semaine peut mêler deux chantiers d'annexes
-        différentes — 3,303 $ l'heure en annexe C3, 3,333 $ en C6.
+        différentes — 3,303 $ l'heure en annexe C-3, 3,333 $ en C-6.
 
         Les heures supplémentaires comptent une pour une : l'avantage rémunère
         une heure de couverture, que la majoration ne dédouble pas.

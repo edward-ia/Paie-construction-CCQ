@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
+<odoo>
 
     <record id="taux_416_c3_compagnon_2025" model="ccq.taux.salaire">
         <field name="metier_id" ref="metier_416"/>

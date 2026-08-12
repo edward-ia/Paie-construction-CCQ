@@ -23,7 +23,7 @@
         <field name="annexe_id" ref="annexe_ic_c"/>
         <field name="date_debut">2026-04-26</field>
         <field name="montant_horaire">3.303</field>
-        <field name="note">Annexe C3 au rapport mensuel. Assurance vie et maladie seulement.</field>
+        <field name="note">Annexe C-3 au rapport mensuel. Assurance vie et maladie seulement.</field>
     </record>
 
     <record id="avantage_imposable_416_c6_2026" model="ccq.avantage.imposable">
@@ -32,7 +32,7 @@
         <field name="annexe_id" ref="annexe_ic_c1"/>
         <field name="date_debut">2026-04-26</field>
         <field name="montant_horaire">3.333</field>
-        <field name="note">Annexe C6 au rapport mensuel. Assurance vie et maladie seulement.</field>
+        <field name="note">Annexe C-6 au rapport mensuel. Assurance vie et maladie seulement.</field>
     </record>
 
 </odoo>

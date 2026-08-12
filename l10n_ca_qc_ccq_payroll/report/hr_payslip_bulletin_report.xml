@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_bulletin_employe_ccq"
+              inherit_id="l10n_ca_qc_hr_payroll.report_bulletin_employe">
+        <xpath expr="//p[@class='text-muted mt-4']" position="before">
+            <t t-set="ccq_renseignements"
+               t-value="o.line_ids.filtered(lambda l: l.code == 'CCQ_AVANTAGE_IMPOSABLE' and l.appears_on_payslip and l.total)"/>
+            <table t-if="ccq_renseignements" class="table table-sm mt-4">
+                <thead>
+                    <tr>
+                        <th>Renseignement — somme ni versée, ni retenue</th>
+                        <th class="text-end">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="ccq_renseignements" t-as="line">
+                        <td t-out="line.name"/>
+                        <td class="text-end"
+                            t-out="line.total"
+                            t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/>
+                    </tr>
+                </tbody>
+            </table>
+            <p t-if="ccq_renseignements" class="text-muted mt-0" style="font-size:9px;">
+                Votre employeur verse cette somme aux régimes d'assurance de l'industrie
+                de la construction. Elle ne vous est pas payée et n'est pas retenue sur
+                votre paie, mais l'impôt du Québec et le Régime de rentes du Québec se
+                calculent dessus : c'est ce qui explique un impôt du Québec plus élevé
+                que votre salaire seul ne le justifierait. Elle n'entre ni dans le revenu
+                imposable fédéral, ni dans le RQAP, ni dans l'assurance-emploi. La
+                Commission de la construction du Québec vous transmettra un relevé 22 et
+                un T4A pour ce montant, qui ne figure pas sur le T4 remis par votre
+                employeur.
+            </p>
+        </xpath>
+    </template>
+
+</odoo>

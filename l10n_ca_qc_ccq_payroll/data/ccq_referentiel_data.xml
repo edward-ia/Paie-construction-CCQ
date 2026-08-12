@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
+<odoo>
     <!--
       ================================================================
       RÉFÉRENTIEL CCQ — DONNÉES VÉRIFIÉES SUR SOURCE
@@ -48,22 +48,22 @@
          passage à +100 %, contre UNE en régime normal (PD5145, section XXI). -->
 
     <record id="annexe_ic_c" model="ccq.annexe">
-        <field name="name">Annexe C — taux généraux</field>
-        <field name="code">C</field>
+        <field name="name">Annexe C-3 — taux généraux</field>
+        <field name="code">C-3</field>
         <field name="secteur_id" ref="secteur_ic"/>
         <field name="heures_supp_a_taux_simple">1</field>
     </record>
     <record id="annexe_ic_c1" model="ccq.annexe">
-        <field name="name">Annexe C-1 — chantiers isolés, Baie-James, nord du 55e parallèle</field>
-        <field name="code">C-1</field>
+        <field name="name">Annexe C-6 — chantiers isolés, Baie-James, nord du 55e parallèle</field>
+        <field name="code">C-6</field>
         <field name="secteur_id" ref="secteur_ic"/>
         <field name="chantier_isole" eval="True"/>
         <field name="heures_supp_a_taux_simple">5</field>
         <field name="note">Couvre les chantiers isolés, le territoire de la Baie-James et les projets de construction au nord du 55e parallèle, y compris le projet Grande-Baleine.</field>
     </record>
     <record id="annexe_ind_b1" model="ccq.annexe">
-        <field name="name">Annexe B-1 — chantiers isolés, Baie-James, nord du 55e parallèle</field>
-        <field name="code">B-1</field>
+        <field name="name">Annexe B-6 — chantiers isolés, Baie-James, nord du 55e parallèle</field>
+        <field name="code">B-6</field>
         <field name="secteur_id" ref="secteur_ind"/>
         <field name="chantier_isole" eval="True"/>
         <field name="heures_supp_a_taux_simple">5</field>
