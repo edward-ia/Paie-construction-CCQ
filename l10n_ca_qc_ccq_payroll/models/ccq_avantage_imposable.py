@@ -44,12 +44,11 @@ class CcqAvantageImposable(models.Model):
     )
     note = fields.Char(string="Note")
 
-    _sql_constraints = [
-        ('unicite_combinaison',
-         'unique(metier_id, secteur_id, annexe_id, date_debut)',
-         "Un seul avantage imposable par métier, secteur, annexe et date d'entrée "
-         "en vigueur."),
-    ]
+    _unicite_combinaison = models.Constraint(
+        'unique(metier_id, secteur_id, annexe_id, date_debut)',
+        "Un seul avantage imposable par métier, secteur, annexe et date d'entrée "
+        "en vigueur.",
+    )
 
     def _montant_applicable(self, metier, secteur, annexe, date):
         """Montant en vigueur à `date` pour la combinaison demandée.
