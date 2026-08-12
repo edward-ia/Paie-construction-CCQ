@@ -3,7 +3,7 @@
 
     <template id="report_bulletin_employe_ccq"
               inherit_id="l10n_ca_qc_hr_payroll.report_bulletin_employe">
-        <xpath expr="//p[@class='text-muted mt-4']" position="before">
+        <xpath expr="//p[hasclass('text-muted', 'mt-4')]" position="before">
             <t t-set="ccq_renseignements"
                t-value="o.line_ids.filtered(lambda l: l.code == 'CCQ_AVANTAGE_IMPOSABLE' and l.appears_on_payslip and l.total)"/>
             <table t-if="ccq_renseignements" class="table table-sm mt-4">
