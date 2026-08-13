@@ -166,7 +166,7 @@
                     <notebook>
                         <page string="Heures" name="heures">
                             <field name="ligne_ids" readonly="state != 'brouillon'">
-                                <list editable="bottom">
+                                <list editable="bottom" open_form_view="True">
                                     <field name="date"/>
                                     <field name="chantier_id"/>
                                     <field name="heures_regulieres" sum="Régulières"/>
@@ -216,6 +216,7 @@
                                                 <field name="heure_debut" widget="float_time"/>
                                                 <field name="heure_fin" widget="float_time"/>
                                                 <field name="duree" sum="Total"/>
+                                                <field name="payee"/>
                                                 <field name="motif"/>
                                             </list>
                                         </field>

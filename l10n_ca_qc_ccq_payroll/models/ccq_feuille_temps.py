@@ -218,13 +218,18 @@ class CcqFeuilleTempsLigne(models.Model):
             ligne.total_heures = (
                 ligne.heures_regulieres + ligne.heures_supp_50 + ligne.heures_supp_100)
 
-    @api.depends('heure_debut', 'heure_fin', 'interruption_ids.duree', 'total_heures')
+    @api.depends('heure_debut', 'heure_fin', 'interruption_ids.duree',
+                 'interruption_ids.payee', 'total_heures')
     def _compute_heures_registre(self):
-        """Durée du quart, interruptions déduites.
+        """Durée du quart, interruptions non payées déduites.
 
         Une heure de fin inférieure à l'heure de début désigne le lendemain : un
         quart de 22 h à 6 h dure huit heures et reste attaché au jour où il a
         commencé, comme le veut la déclaration par journée.
+
+        Le registre consigne tous les arrêts, la loi ne distinguant pas ; mais
+        les pauses payées de la section XX demeurent du temps travaillé, et les
+        retrancher creuserait un écart là où la paie est juste.
         """
         for ligne in self:
             registre = 0.0
@@ -232,7 +237,8 @@ class CcqFeuilleTempsLigne(models.Model):
                 fin = ligne.heure_fin + 24.0 if ligne.heure_fin <= ligne.heure_debut \
                     else ligne.heure_fin
                 registre = fin - ligne.heure_debut - sum(
-                    ligne.interruption_ids.mapped('duree'))
+                    ligne.interruption_ids.filtered(
+                        lambda i: not i.payee).mapped('duree'))
             ligne.heures_registre = round(registre, 2)
             ligne.ecart_registre = round(registre - ligne.total_heures, 2) if registre else 0.0
 
@@ -257,14 +263,19 @@ class CcqFeuilleTempsLigne(models.Model):
 
         On bloque à la saisie : reconstituer des heures de début et de fin un an
         plus tard, devant un inspecteur, n'est pas possible.
+
+        Le test porte sur l'égalité des deux bornes, non sur leur valeur : un
+        flottant vide vaut zéro, et zéro est aussi minuit. Deux bornes égales
+        sont le seul cas qui ne désigne aucun quart — ni un horaire absent, ni
+        une journée de vingt-quatre heures.
         """
         for ligne in self:
-            if ligne.assujetti and ligne.total_heures and not (
-                    ligne.heure_debut or ligne.heure_fin):
+            if ligne.assujetti and ligne.total_heures and \
+                    ligne.heure_debut == ligne.heure_fin:
                 raise ValidationError(
-                    "Le registre exige l'heure de début et de fin du travail. "
-                    "Renseignez-les sur la ligne du %s pour %s."
-                    % (ligne.date, ligne.employee_id.name or "ce salarié")
+                    "Le registre exige l'heure de début et de fin du travail, et "
+                    "elles doivent différer. Renseignez-les sur la ligne du %s "
+                    "pour %s." % (ligne.date, ligne.employee_id.name or "ce salarié")
                 )
 
     @api.depends('feuille_id.employee_id', 'chantier_id')
@@ -376,6 +387,12 @@ class CcqFeuilleTempsInterruption(models.Model):
         help="Heure à laquelle le travail a repris.")
     duree = fields.Float(
         string="Durée", compute='_compute_duree', store=True, digits=(8, 2))
+    payee = fields.Boolean(
+        string="Payée",
+        help="Les deux pauses de quinze minutes de la section XX sont payées et "
+             "restent comprises dans les heures travaillées ; la période de repas "
+             "ne l'est pas. Seules les interruptions non payées se retranchent des "
+             "heures au registre.")
 
     @api.depends('heure_debut', 'heure_fin')
     def _compute_duree(self):
