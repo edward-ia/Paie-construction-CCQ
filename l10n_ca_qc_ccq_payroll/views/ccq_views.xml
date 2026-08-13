@@ -188,8 +188,10 @@
                                     <field name="local_id" optional="hide"/>
                                     <field name="heure_debut" widget="float_time"/>
                                     <field name="heure_fin" widget="float_time"/>
-                                    <field name="heures_registre" optional="show"/>
-                                    <field name="ecart_registre" optional="show"
+                                    <field name="heures_registre" widget="float_time"
+                                           optional="show"/>
+                                    <field name="ecart_registre" widget="float_time"
+                                           optional="show"
                                            decoration-danger="ecart_registre != 0"/>
                                 </list>
                                 <form string="Ligne d'heures">
@@ -206,8 +208,8 @@
                                         <group string="Registre légal">
                                             <field name="heure_debut" widget="float_time"/>
                                             <field name="heure_fin" widget="float_time"/>
-                                            <field name="heures_registre"/>
-                                            <field name="ecart_registre"/>
+                                            <field name="heures_registre" widget="float_time"/>
+                                            <field name="ecart_registre" widget="float_time"/>
                                         </group>
                                     </group>
                                     <group string="Interruptions">
@@ -215,7 +217,8 @@
                                             <list editable="bottom">
                                                 <field name="heure_debut" widget="float_time"/>
                                                 <field name="heure_fin" widget="float_time"/>
-                                                <field name="duree" sum="Total"/>
+                                                <field name="duree" widget="float_time"
+                                                       sum="Total"/>
                                                 <field name="payee"/>
                                                 <field name="motif"/>
                                             </list>
