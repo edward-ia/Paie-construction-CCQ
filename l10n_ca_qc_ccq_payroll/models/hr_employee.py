@@ -24,6 +24,27 @@ DELAI_ALERTE_CERTIFICAT = 60
 RESUME_ALERTE_CERTIFICAT = "Certificat de compétence CCQ à renouveler"
 
 
+def _nas_valide(numero):
+    """Clé de contrôle du numéro d'assurance sociale : neuf chiffres, Luhn.
+
+    Le rapport mensuel identifie la personne salariée par son NAS ou son numéro
+    de client, et une identification erronée fait rejeter la ligne, qui n'est
+    pas comptabilisée jusqu'à correction. Un chiffre de trop se voit ici plutôt
+    que six semaines plus tard, dans un avis de la Commission.
+    """
+    if len(numero) != 9:
+        return False
+    somme = 0
+    for rang, chiffre in enumerate(reversed(numero)):
+        valeur = int(chiffre)
+        if rang % 2:
+            valeur *= 2
+            if valeur > 9:
+                valeur -= 9
+        somme += valeur
+    return somme % 10 == 0
+
+
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
@@ -165,4 +186,19 @@ class HrEmployee(models.Model):
                     "Le métier « %s » compte %s période(s) d'apprentissage : la période "
                     "choisie pour « %s » n'existe pas."
                     % (metier.display_name, metier.nb_periodes_apprentissage, employee.name)
+                )
+
+    @api.constrains('ssnid', 'l10n_ca_qc_ccq_assujetti')
+    def _check_nas(self):
+        for employee in self:
+            if not (employee.l10n_ca_qc_ccq_assujetti and employee.ssnid):
+                continue
+            chiffres = ''.join(c for c in employee.ssnid if c.isdigit())
+            if not _nas_valide(chiffres):
+                raise ValidationError(
+                    "Le numéro d'assurance sociale de « %s » compte %s chiffre(s) et "
+                    "ne passe pas la clé de contrôle. Le rapport mensuel identifie la "
+                    "personne salariée par son NAS ou son numéro de client, et une "
+                    "identification erronée fait rejeter la ligne."
+                    % (employee.name, len(chiffres))
                 )

@@ -132,7 +132,9 @@
                 <field name="date_debut"/>
                 <field name="date_fin"/>
                 <field name="total_heures" sum="Total"/>
-                <field name="state"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'brouillon'"
+                       decoration-success="state == 'confirme'"/>
             </list>
         </field>
     </record>
@@ -311,7 +313,10 @@
                 <field name="total_heures" sum="Heures"/>
                 <field name="total_a_remettre" sum="À remettre"/>
                 <field name="inactif" optional="show"/>
-                <field name="state"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'brouillon'"
+                       decoration-warning="state == 'calcule'"
+                       decoration-success="state == 'transmis'"/>
                 <field name="currency_id" column_invisible="True"/>
             </list>
         </field>
