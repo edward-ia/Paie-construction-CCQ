@@ -240,6 +240,55 @@
         </field>
     </record>
 
+    <record id="view_ccq_feuille_temps_interruption_list" model="ir.ui.view">
+        <field name="name">ccq.feuille.temps.interruption.list</field>
+        <field name="model">ccq.feuille.temps.interruption</field>
+        <field name="arch" type="xml">
+            <list string="Interruptions" editable="bottom">
+                <field name="heure_debut" widget="float_time"/>
+                <field name="heure_fin" widget="float_time"/>
+                <field name="duree" widget="float_time" sum="Total"/>
+                <field name="payee"/>
+                <field name="motif"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ccq_feuille_temps_ligne_form" model="ir.ui.view">
+        <field name="name">ccq.feuille.temps.ligne.form</field>
+        <field name="model">ccq.feuille.temps.ligne</field>
+        <field name="arch" type="xml">
+            <form string="Ligne d'heures">
+                <sheet>
+                    <group>
+                        <group string="Travail">
+                            <field name="date"/>
+                            <field name="chantier_id"/>
+                            <field name="heures_regulieres"/>
+                            <field name="heures_supp_50"/>
+                            <field name="heures_supp_100"/>
+                            <field name="total_heures"/>
+                            <field name="prime_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Registre légal">
+                            <field name="heure_debut" widget="float_time"/>
+                            <field name="heure_fin" widget="float_time"/>
+                            <field name="heures_registre" widget="float_time"/>
+                            <field name="ecart_registre" widget="float_time"/>
+                        </group>
+                    </group>
+                    <group string="Interruptions">
+                        <field name="interruption_ids" nolabel="1"/>
+                    </group>
+                    <group string="Déplacement">
+                        <field name="distance_km"/>
+                        <field name="chambre_pension"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="action_ccq_feuille_temps" model="ir.actions.act_window">
         <field name="name">Feuilles de temps</field>
         <field name="res_model">ccq.feuille.temps</field>
