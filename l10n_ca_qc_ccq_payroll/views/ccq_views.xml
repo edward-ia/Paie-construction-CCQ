@@ -276,14 +276,13 @@
                             <field name="heures_registre" widget="float_time"/>
                             <field name="ecart_registre" widget="float_time"/>
                         </group>
+                        <group string="Déplacement">
+                            <field name="distance_km"/>
+                            <field name="chambre_pension"/>
+                        </group>
                     </group>
-                    <group string="Interruptions">
-                        <field name="interruption_ids" nolabel="1"/>
-                    </group>
-                    <group string="Déplacement">
-                        <field name="distance_km"/>
-                        <field name="chambre_pension"/>
-                    </group>
+                    <separator string="Interruptions"/>
+                    <field name="interruption_ids"/>
                 </sheet>
             </form>
         </field>
