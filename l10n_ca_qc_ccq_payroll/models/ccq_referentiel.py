@@ -28,6 +28,19 @@ PERIODE_SELECTION = [
     ('sans_periode', "Sans période (occupation)"),
 ]
 
+# Codes attendus par la Commission au rapport mensuel. La clé de sélection est
+# interne au module ; la déclaration porte le rang de la période pour un
+# apprenti, « C » pour un compagnon et « O » pour une occupation (PD5277 p. 2).
+CODE_PERIODE_CCQ = {
+    'apprenti_1': '1',
+    'apprenti_2': '2',
+    'apprenti_3': '3',
+    'apprenti_4': '4',
+    'apprenti_5': '5',
+    'compagnon': 'C',
+    'sans_periode': 'O',
+}
+
 STATUT_SELECTION = [
     ('A', "A — Contribution volontaire (avec avantages sociaux)"),
     ('C', "C — Entrepreneur autonome (sans avantages sociaux)"),

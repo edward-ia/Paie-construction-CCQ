@@ -53,7 +53,7 @@
                                     <td t-out="ligne.employee_id.name"/>
                                     <td t-out="ligne.identifiant"/>
                                     <td t-out="ligne.metier_id.code or ''"/>
-                                    <td t-out="ligne.periode or ''"/>
+                                    <td t-out="ligne.code_periode or ''"/>
                                     <td t-out="ligne.statut or ''"/>
                                     <td t-out="ligne.secteur_id.code or ''"/>
                                     <td t-out="ligne.annexe_id.code or ''"/>

@@ -33,7 +33,7 @@ from datetime import date, timedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
-from .ccq_referentiel import PERIODE_SELECTION, STATUT_SELECTION
+from .ccq_referentiel import CODE_PERIODE_CCQ, PERIODE_SELECTION, STATUT_SELECTION
 
 MOIS_SELECTION = [
     ('1', "Janvier"), ('2', "Février"), ('3', "Mars"), ('4', "Avril"),
@@ -406,6 +406,10 @@ class CcqRapportMensuelLigne(models.Model):
              "comptabilisée jusqu'à correction.")
     metier_id = fields.Many2one('ccq.metier', string="Métier", ondelete='restrict')
     periode = fields.Selection(PERIODE_SELECTION, string="Période")
+    code_periode = fields.Char(
+        string="Code de période", compute='_compute_code_periode',
+        help="Ce que porte la déclaration : le rang de la période pour un "
+             "apprenti, « C » pour un compagnon, « O » pour une occupation.")
     statut = fields.Selection(STATUT_SELECTION, string="Statut")
     secteur_id = fields.Many2one('ccq.secteur', string="Secteur", ondelete='restrict')
     annexe_id = fields.Many2one('ccq.annexe', string="Annexe", ondelete='restrict')
@@ -431,6 +435,11 @@ class CcqRapportMensuelLigne(models.Model):
         for ligne in self:
             ligne.total_heures = (
                 ligne.heures_regulieres + ligne.heures_supp_50 + ligne.heures_supp_100)
+
+    @api.depends('periode')
+    def _compute_code_periode(self):
+        for ligne in self:
+            ligne.code_periode = CODE_PERIODE_CCQ.get(ligne.periode, '')
 
     @api.depends('employee_id')
     def _compute_identifiant(self):
