@@ -58,9 +58,9 @@
                                     <td t-out="ligne.secteur_id.code or ''"/>
                                     <td t-out="ligne.annexe_id.code or ''"/>
                                     <td t-out="ligne.region_id.code or ''"/>
-                                    <td class="text-end" t-out="ligne.heures_regulieres"/>
-                                    <td class="text-end" t-out="ligne.heures_supp_50"/>
-                                    <td class="text-end" t-out="ligne.heures_supp_100"/>
+                                    <td class="text-end" t-out="ligne.heures_regulieres" t-options='{"widget": "float", "precision": 2}'/>
+                                    <td class="text-end" t-out="ligne.heures_supp_50" t-options='{"widget": "float", "precision": 2}'/>
+                                    <td class="text-end" t-out="ligne.heures_supp_100" t-options='{"widget": "float", "precision": 2}'/>
                                     <td class="text-end" t-out="ligne.semaines_travaillees"/>
                                     <td class="text-end" t-out="ligne.salaire"
                                         t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
@@ -68,7 +68,7 @@
                                 <tr class="border-top">
                                     <td colspan="8"><strong>Total</strong></td>
                                     <td class="text-end" colspan="3"><strong
-                                        t-out="o.total_heures"/></td>
+                                        t-out="o.total_heures" t-options='{"widget": "float", "precision": 2}'/></td>
                                     <td/>
                                     <td class="text-end"><strong t-out="o.total_salaire"
                                         t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
