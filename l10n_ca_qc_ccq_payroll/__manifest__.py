@@ -1,6 +1,6 @@
 {
     'name': "Paie — Construction Québec (CCQ)",
-    'version': '19.0.0.26.0',
+    'version': '19.0.0.27.0',
     'summary': "Couche construction (loi R-20 / CCQ) par-dessus la paie québécoise : "
                "métiers, secteurs, annexes, chantiers, taux de convention et "
                "feuilles de temps hebdomadaires",

@@ -45,6 +45,19 @@ def _nas_valide(numero):
     return somme % 10 == 0
 
 
+def _verifier_nas(nom, assujetti, ssnid):
+    if not (assujetti and ssnid):
+        return
+    chiffres = ''.join(c for c in ssnid if c.isdigit())
+    if not _nas_valide(chiffres):
+        raise ValidationError(
+            "Le numéro d'assurance sociale de « %s » compte %s chiffre(s) et ne "
+            "passe pas la clé de contrôle. Le rapport mensuel identifie la personne "
+            "salariée par son NAS ou son numéro de client, et une identification "
+            "erronée fait rejeter la ligne." % (nom, len(chiffres))
+        )
+
+
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
@@ -188,17 +201,26 @@ class HrEmployee(models.Model):
                     % (metier.display_name, metier.nb_periodes_apprentissage, employee.name)
                 )
 
-    @api.constrains('ssnid', 'l10n_ca_qc_ccq_assujetti')
+    @api.constrains('l10n_ca_qc_ccq_assujetti')
     def _check_nas(self):
         for employee in self:
-            if not (employee.l10n_ca_qc_ccq_assujetti and employee.ssnid):
-                continue
-            chiffres = ''.join(c for c in employee.ssnid if c.isdigit())
-            if not _nas_valide(chiffres):
-                raise ValidationError(
-                    "Le numéro d'assurance sociale de « %s » compte %s chiffre(s) et "
-                    "ne passe pas la clé de contrôle. Le rapport mensuel identifie la "
-                    "personne salariée par son NAS ou son numéro de client, et une "
-                    "identification erronée fait rejeter la ligne."
-                    % (employee.name, len(chiffres))
-                )
+            _verifier_nas(employee.name, employee.l10n_ca_qc_ccq_assujetti,
+                          employee.ssnid)
+
+
+class HrVersion(models.Model):
+    _inherit = 'hr.version'
+
+    @api.constrains('ssnid')
+    def _check_nas_ccq(self):
+        """Le NAS vit ici, pas sur l'employé.
+
+        En Odoo 19, `hr.employee.ssnid` est un related NON STOCKÉ vers
+        `hr.version`. Une contrainte posée sur l'employé ne se déclencherait
+        jamais à l'écriture : Odoo n'évalue les contraintes que sur les champs
+        stockés du modèle écrit.
+        """
+        for version in self:
+            employee = version.employee_id
+            _verifier_nas(employee.name, employee.l10n_ca_qc_ccq_assujetti,
+                          version.ssnid)
